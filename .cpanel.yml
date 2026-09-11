@@ -1,0 +1,10 @@
+---
+deployment:
+  tasks:
+    - /opt/cpanel/ea-php83/root/usr/bin/php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - /opt/cpanel/ea-php83/root/usr/bin/php composer-setup.php --install-dir=. --filename=composer.phar
+    - /opt/cpanel/ea-php83/root/usr/bin/php composer.phar install --no-dev --optimize-autoloader --no-interaction
+    - /bin/rm -f composer-setup.php
+    - /bin/chmod -R 775 storage bootstrap/cache
+    - /opt/cpanel/ea-php83/root/usr/bin/php artisan storage:link
+    - /opt/cpanel/ea-php83/root/usr/bin/php artisan migrate --force
