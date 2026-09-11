@@ -22,15 +22,21 @@
                             </x-layouts.sidebar-two-level-link-parent>
                             @endif
 
-                            @if(auth()->user()->isSuperAdmin())
+                            @if(auth()->user()->hasPermission('view-organisasi') || auth()->user()->hasPermission('view-pendaftaran') || auth()->user()->hasPermission('view-cache'))
                             <x-layouts.sidebar-two-level-link-parent title="Setting" icon="fas-gear"
                                 :active="request()->routeIs('settings.organisasi*') || request()->routeIs('settings.pendaftaran*') || request()->routeIs('cache*')">
+                                @if(auth()->user()->hasPermission('view-organisasi'))
                                 <x-layouts.sidebar-two-level-link href="{{ route('settings.organisasi.edit') }}" icon='fas-id-card'
                                     :active="request()->routeIs('settings.organisasi*')">Identitas Organisasi</x-layouts.sidebar-two-level-link>
+                                @endif
+                                @if(auth()->user()->hasPermission('view-pendaftaran'))
                                 <x-layouts.sidebar-two-level-link href="{{ route('settings.pendaftaran.edit') }}" icon='fas-sliders'
                                     :active="request()->routeIs('settings.pendaftaran*')">Pengaturan Pendaftaran</x-layouts.sidebar-two-level-link>
+                                @endif
+                                @if(auth()->user()->hasPermission('view-cache'))
                                 <x-layouts.sidebar-two-level-link href="{{ route('cache.index') }}" icon='fas-server'
                                     :active="request()->routeIs('cache*')">Cache</x-layouts.sidebar-two-level-link>
+                                @endif
                             </x-layouts.sidebar-two-level-link-parent>
                             @endif
 

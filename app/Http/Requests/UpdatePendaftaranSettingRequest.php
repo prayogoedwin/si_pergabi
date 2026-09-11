@@ -11,7 +11,7 @@ class UpdatePendaftaranSettingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->isSuperAdmin() === true;
+        return $this->user()?->hasPermission('edit-pendaftaran') === true;
     }
 
     /**

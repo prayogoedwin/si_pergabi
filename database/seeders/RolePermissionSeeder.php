@@ -44,6 +44,10 @@ class RolePermissionSeeder extends Seeder
             'verify-anggota-pc',
             'validate-anggota-pd',
             'approve-anggota-pp',
+            'view-organisasi',
+            'edit-organisasi',
+            'view-pendaftaran',
+            'edit-pendaftaran',
             'view-cache',
         ];
 
@@ -53,10 +57,6 @@ class RolePermissionSeeder extends Seeder
 
         $userPermissions = Permission::whereIn('name', [
             'view-users', 'show-users', 'create-users', 'edit-users', 'download-users', 'delete-users',
-        ])->pluck('id');
-
-        $permissionPermissions = Permission::whereIn('name', [
-            'view-permissions', 'show-permissions', 'create-permissions', 'edit-permissions', 'download-permissions', 'delete-permissions',
         ])->pluck('id');
 
         $leaderPermissions = Permission::whereIn('name', [
@@ -71,7 +71,7 @@ class RolePermissionSeeder extends Seeder
             'view-anggota', 'show-anggota', 'validate-anggota-pd',
         ])->pluck('id');
 
-        $adminPpPermissions = $userPermissions->merge($permissionPermissions)->merge(
+        $adminPpPermissions = $userPermissions->merge(
             Permission::whereIn('name', [
                 'view-wilayah', 'show-wilayah', 'create-wilayah', 'edit-wilayah', 'download-wilayah', 'delete-wilayah',
                 'view-area',
@@ -120,6 +120,7 @@ class RolePermissionSeeder extends Seeder
 
         $this->removeLegacyRoles($keptSlugs);
         $this->seedUsers();
+        $this->call(SettingPermissionSeeder::class);
     }
 
     /**

@@ -28,11 +28,12 @@ class SuperAdminVisibilityTest extends TestCase
             ->assertDontSee('Example two level')
             ->assertDontSee('Example three level')
             ->assertDontSee(route('roles.index'))
-            ->assertDontSee(route('cache.index'))
-            ->assertDontSee(route('settings.organisasi.edit'))
-            ->assertDontSee(route('settings.pendaftaran.edit'))
-            ->assertDontSee('Identitas Organisasi')
-            ->assertDontSee('Pengaturan Pendaftaran');
+            ->assertDontSee(route('permissions.index'))
+            ->assertSee(route('cache.index'))
+            ->assertSee(route('settings.organisasi.edit'))
+            ->assertSee(route('settings.pendaftaran.edit'))
+            ->assertSee('Identitas Organisasi')
+            ->assertSee('Pengaturan Pendaftaran');
     }
 
     public function test_super_admin_sees_roles_menu(): void
@@ -134,6 +135,18 @@ class SuperAdminVisibilityTest extends TestCase
         $emails = collect($response->json('data'))->pluck('email');
 
         $this->assertTrue($emails->contains('superadmin@example.com'));
+    }
+
+    public function test_admin_pp_cannot_access_permissions_management(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('permissions.index'))
+            ->assertForbidden();
+
+        $this->assertFalse(
+            Role::query()->where('slug', Role::ADMIN_PP)->firstOrFail()
+                ->permissions()->where('name', 'view-permissions')->exists()
+        );
     }
 
     public function test_admin_cannot_access_roles_management(): void

@@ -48,16 +48,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('settings/appearance', [Settings\AppearanceController::class, 'edit'])->name('settings.appearance.edit');
     Route::put('settings/appearance', [Settings\AppearanceController::class, 'update'])->name('settings.appearance.update');
 
+    Route::get('settings/pendaftaran', [Settings\PendaftaranSettingController::class, 'edit'])->name('settings.pendaftaran.edit')->middleware('permission:view-pendaftaran');
+    Route::put('settings/pendaftaran', [Settings\PendaftaranSettingController::class, 'update'])->name('settings.pendaftaran.update')->middleware('permission:edit-pendaftaran');
+    Route::get('settings/organisasi', [Settings\OrganisasiSettingController::class, 'edit'])->name('settings.organisasi.edit')->middleware('permission:view-organisasi');
+    Route::put('settings/organisasi', [Settings\OrganisasiSettingController::class, 'update'])->name('settings.organisasi.update')->middleware('permission:edit-organisasi');
+    Route::get('cache', [CacheController::class, 'index'])->name('cache.index')->middleware('permission:view-cache');
+    Route::post('cache/flush', [CacheController::class, 'flush'])->name('cache.flush')->middleware('permission:view-cache');
+    Route::post('cache/prefix', [CacheController::class, 'destroyPrefix'])->name('cache.destroy-prefix')->middleware('permission:view-cache');
+    Route::post('cache/key', [CacheController::class, 'destroy'])->name('cache.destroy')->middleware('permission:view-cache');
+
     // Roles Management - Super Admin only
     Route::middleware('role:'.Role::SUPER_ADMIN)->group(function () {
-        Route::get('settings/pendaftaran', [Settings\PendaftaranSettingController::class, 'edit'])->name('settings.pendaftaran.edit');
-        Route::put('settings/pendaftaran', [Settings\PendaftaranSettingController::class, 'update'])->name('settings.pendaftaran.update');
-        Route::get('settings/organisasi', [Settings\OrganisasiSettingController::class, 'edit'])->name('settings.organisasi.edit');
-        Route::put('settings/organisasi', [Settings\OrganisasiSettingController::class, 'update'])->name('settings.organisasi.update');
-        Route::get('cache', [CacheController::class, 'index'])->name('cache.index');
-        Route::post('cache/flush', [CacheController::class, 'flush'])->name('cache.flush');
-        Route::post('cache/prefix', [CacheController::class, 'destroyPrefix'])->name('cache.destroy-prefix');
-        Route::post('cache/key', [CacheController::class, 'destroy'])->name('cache.destroy');
         Route::get('roles', [RoleController::class, 'index'])->name('roles.index')->middleware('permission:view-roles');
         Route::get('roles/export', [RoleController::class, 'export'])->name('roles.export')->middleware('permission:download-roles');
         Route::get('roles/create', [RoleController::class, 'create'])->name('roles.create')->middleware('permission:create-roles');

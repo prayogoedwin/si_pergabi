@@ -123,16 +123,16 @@ class DashboardCacheTest extends TestCase
         $this->assertFalse(Cache::has('dashboard:kabupaten:36.71'));
     }
 
-    public function test_admin_pp_cannot_open_cache_menu(): void
+    public function test_admin_pp_can_open_cache_menu(): void
     {
         $this->actingAs($this->adminPp())
             ->get(route('cache.index'))
-            ->assertForbidden();
+            ->assertOk();
 
         $this->actingAs($this->adminPp())
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertDontSee(route('cache.index'));
+            ->assertSee(route('cache.index'));
     }
 
     private function makeAnggota(string $pd, string $pc): Anggota

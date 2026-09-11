@@ -61,13 +61,14 @@ class PendaftaranSettingTest extends TestCase
             ->assertSessionHasErrors('email_aktif');
     }
 
-    public function test_admin_pp_cannot_access_settings(): void
+    public function test_admin_pp_can_access_settings(): void
     {
         $admin = User::query()->where('email', 'admin@example.com')->firstOrFail();
 
         $this->actingAs($admin)
             ->get(route('settings.pendaftaran.edit'))
-            ->assertForbidden();
+            ->assertOk()
+            ->assertSee('Tipe pendaftaran');
     }
 
     private function superAdmin(): User

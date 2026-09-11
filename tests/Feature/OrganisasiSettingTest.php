@@ -121,13 +121,14 @@ class OrganisasiSettingTest extends TestCase
         $this->assertFalse($settings->isCustomPublicFile('organisasi.logo'));
     }
 
-    public function test_admin_pp_cannot_access_organisasi_settings(): void
+    public function test_admin_pp_can_access_organisasi_settings(): void
     {
         $admin = User::query()->where('email', 'admin@example.com')->firstOrFail();
 
         $this->actingAs($admin)
             ->get(route('settings.organisasi.edit'))
-            ->assertForbidden();
+            ->assertOk()
+            ->assertSee('Identitas organisasi');
     }
 
     private function superAdmin(): User
