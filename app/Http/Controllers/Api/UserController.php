@@ -11,7 +11,10 @@ class UserController extends Controller
 {
     public function index(): JsonResponse
     {
-        $users = User::with('roles.permissions')->paginate(15);
+        $users = User::query()
+            ->visibleTo(request()->user())
+            ->with('roles.permissions')
+            ->paginate(15);
 
         return response()->json($users);
     }

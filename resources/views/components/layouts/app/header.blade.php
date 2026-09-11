@@ -1,31 +1,29 @@
 <!-- Header -->
-<header class="bg-white dark:bg-gray-800 shadow-sm z-20 border-b border-gray-200 dark:border-gray-700">
+<header class="bg-[#f7f3ee] dark:bg-navy-950 shadow-sm z-20 border-b border-[#e4ddd3] dark:border-gold-400/30">
     <div class="flex items-center justify-between h-16 px-4">
-        <!-- Left side: Logo and toggle -->
         <div class="flex items-center">
             <button @click="toggleSidebar"
-                class="p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none">
+                class="p-2 rounded-md text-navy-800/80 hover:text-navy-900 dark:text-cream-100/80 dark:hover:text-gold-400 focus:outline-none">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
-            <div class="ml-4 font-semibold text-xl text-blue-600 dark:text-blue-400">{{ config('app.name') }}</div>
+            <a href="{{ route('dashboard') }}" class="ml-3 flex items-center gap-3">
+                <img src="{{ asset('images/logo-pergabi.png') }}" alt="Logo PERGABI" class="h-10 w-10 object-contain">
+                <span class="font-display text-2xl tracking-[0.16em] text-navy-800 dark:text-gold-400">PERGABI</span>
+            </a>
         </div>
 
-        <!-- Right side: Theme toggle, Search, notifications, profile -->
         <div class="flex items-center space-x-4">
-            <!-- Theme Toggle -->
             <div x-data="{ open: false }" class="relative">
                 <button @click="open = !open"
-                    class="p-2 rounded-md text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors duration-200">
-                    <!-- Sun icon for light mode -->
+                    class="p-2 rounded-md text-navy-800/80 hover:text-navy-900 dark:text-cream-100/80 dark:hover:text-gold-400 focus:outline-none transition-colors duration-200">
                     <svg x-show="localStorage.theme !== 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 3v1m0 16v1m9-9h-1M4 9H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
                     </svg>
-                    <!-- Moon icon for dark mode -->
                     <svg x-show="localStorage.theme === 'dark'" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
                         fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -34,7 +32,7 @@
                 </button>
 
                 <div x-show="open" @click.away="open = false" x-transition
-                    class="absolute border border-gray-200 dark:border-gray-700 right-0 mt-2 w-36 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50">
+                    class="absolute border border-[#e4ddd3] dark:border-navy-800 right-0 mt-2 w-36 bg-white dark:bg-navy-800 rounded-md shadow-lg py-1 z-50">
                     <form id="header-appearance-form" action="{{ route('settings.appearance.update') }}" method="POST"
                         class="hidden">
                         @csrf
@@ -43,7 +41,7 @@
                     </form>
 
                     <button type="button" onclick="persistTheme('light')"
-                        class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center {{ (auth()->user()->theme_preference ?? 'system') === 'light' ? 'bg-gray-100 text-blue-700 dark:bg-gray-700 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300' }}">
+                        class="w-full text-left px-4 py-2 text-sm hover:bg-cream-50 dark:hover:bg-navy-900 flex items-center {{ (auth()->user()->theme_preference ?? 'system') === 'light' ? 'bg-cream-50 text-navy-800 dark:bg-navy-900 dark:text-gold-400 font-medium' : 'text-navy-800 dark:text-cream-100' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -52,7 +50,7 @@
                         Light
                     </button>
                     <button type="button" onclick="persistTheme('dark')"
-                        class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center {{ (auth()->user()->theme_preference ?? 'system') === 'dark' ? 'bg-gray-100 text-blue-700 dark:bg-gray-700 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300' }}">
+                        class="w-full text-left px-4 py-2 text-sm hover:bg-cream-50 dark:hover:bg-navy-900 flex items-center {{ (auth()->user()->theme_preference ?? 'system') === 'dark' ? 'bg-cream-50 text-navy-800 dark:bg-navy-900 dark:text-gold-400 font-medium' : 'text-navy-800 dark:text-cream-100' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -61,7 +59,7 @@
                         Dark
                     </button>
                     <button type="button" onclick="persistTheme('system')"
-                        class="w-full text-left px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center {{ (auth()->user()->theme_preference ?? 'system') === 'system' ? 'bg-gray-100 text-blue-700 dark:bg-gray-700 dark:text-blue-400 font-medium' : 'text-gray-700 dark:text-gray-300' }}">
+                        class="w-full text-left px-4 py-2 text-sm hover:bg-cream-50 dark:hover:bg-navy-900 flex items-center {{ (auth()->user()->theme_preference ?? 'system') === 'system' ? 'bg-cream-50 text-navy-800 dark:bg-navy-900 dark:text-gold-400 font-medium' : 'text-navy-800 dark:text-cream-100' }}">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -73,12 +71,10 @@
 
                 <script>
                     window.persistTheme = function(theme) {
-                        // Update UI immediately (client-side)
                         if (typeof window.setAppearance === 'function') {
                             window.setAppearance(theme);
                         }
-                        
-                        // Set and submit form for persistence
+
                         const form = document.getElementById('header-appearance-form');
                         const input = document.getElementById('header_theme_preference');
                         if (form && input) {
@@ -88,26 +84,25 @@
                     }
                 </script>
             </div>
-            <!-- Profile -->
             <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" class="flex items-center focus:outline-none">
+                <button @click="open = !open" class="flex items-center focus:outline-none text-navy-800 dark:text-cream-100">
                     <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
                         <span
-                            class="flex h-full w-full items-center justify-center rounded-lg bg-gray-200 text-black dark:bg-gray-700 dark:text-white">
+                            class="flex h-full w-full items-center justify-center rounded-lg bg-navy-800 text-white dark:bg-saffron-600">
                             {{ Auth::user()->initials() }}
                         </span>
                     </span>
                     <span class="ml-2 hidden md:block">{{ Auth::user()->name }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24"
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1 text-navy-800/50 dark:text-gold-400" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                 </button>
 
                 <div x-show="open" @click.away="open = false" :class="{ 'block': open, 'hidden': !open }"
-                    class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-50 border border-gray-200 dark:border-gray-700">
+                    class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-navy-800 rounded-md shadow-lg py-1 z-50 border border-[#e4ddd3] dark:border-gold-400/20">
                     <a href="{{ route('settings.profile.edit') }}"
-                        class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                        class="block px-4 py-2 text-sm text-navy-800 dark:text-cream-100 hover:bg-cream-50 dark:hover:bg-navy-900 dark:hover:text-gold-400">
                         <div class="flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor">
@@ -119,11 +114,11 @@
                             Settings
                         </div>
                     </a>
-                    <div class="border-t border-gray-200 dark:border-gray-700"></div>
+                    <div class="border-t border-[#e4ddd3] dark:border-gold-400/20"></div>
                     <form method="POST" action="{{ route('logout') }}" class="w-full">
                         @csrf
                         <button type="submit"
-                            class="block w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                            class="block w-full px-4 py-2 text-sm text-navy-800 dark:text-cream-100 hover:bg-cream-50 dark:hover:bg-navy-900 dark:hover:text-gold-400">
                             <div class="flex items-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">

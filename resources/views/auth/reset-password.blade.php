@@ -1,7 +1,6 @@
 <x-layouts.auth :title="__('Reset Password')">
     <!-- Reset Password Card -->
-    <div
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+    <div class="bg-[#fff8f1] rounded-2xl shadow-xl border border-white/20 overflow-hidden">
         <div class="p-6">
             <div class="text-center mb-6">
                 <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Reset Password') }}</h1>

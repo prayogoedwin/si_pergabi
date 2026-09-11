@@ -22,6 +22,10 @@
         </div>
         <div class="flex gap-2">
             @if(auth()->user()->hasPermission('edit-users'))
+                <form action="{{ route('users.reset-password', $user) }}" method="POST" onsubmit="return confirm('Reset password pengguna ini? Password baru akan ditampilkan sekali.')">
+                    @csrf
+                    <x-button type="secondary">Reset password</x-button>
+                </form>
                 <a href="{{ route('users.edit', $user) }}">
                     <x-button type="primary">{{ __('Edit User') }}</x-button>
                 </a>
@@ -80,6 +84,15 @@
                 </div>
 
                 <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Wilayah tugas
+                    </label>
+                    <div class="text-gray-900 dark:text-gray-100">
+                        {{ $user->wilayahTugasLabel() }}
+                    </div>
+                </div>
+
+                <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                         {{ __('Assigned Roles') }} ({{ $user->roles->count() }})
                     </label>
@@ -87,7 +100,7 @@
                         <div class="flex flex-wrap gap-2">
                             @foreach($user->roles as $role)
                                 <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                                    {{ $role->name }}
+                                    {{ $role->name }} · {{ $role->areaLabel() }}
                                 </span>
                             @endforeach
                         </div>

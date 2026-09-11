@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Helpers\Area;
 use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
@@ -31,66 +32,139 @@ class RolePermissionSeeder extends Seeder
             'edit-permissions',
             'download-permissions',
             'delete-permissions',
+            'view-wilayah',
+            'show-wilayah',
+            'create-wilayah',
+            'edit-wilayah',
+            'download-wilayah',
+            'delete-wilayah',
+            'view-area',
+            'view-anggota',
+            'show-anggota',
+            'verify-anggota-pc',
+            'validate-anggota-pd',
+            'approve-anggota-pp',
+            'view-cache',
         ];
 
         foreach ($permissions as $permissionName) {
             Permission::firstOrCreate(['name' => $permissionName]);
         }
 
-        $superAdminRole = Role::firstOrCreate(['name' => 'super-admin']);
-        $adminRole = Role::firstOrCreate(['name' => 'admin']);
-        $editorRole = Role::firstOrCreate(['name' => 'editor']);
-        $userRole = Role::firstOrCreate(['name' => 'user']);
+        $userPermissions = Permission::whereIn('name', [
+            'view-users', 'show-users', 'create-users', 'edit-users', 'download-users', 'delete-users',
+        ])->pluck('id');
 
-        $superAdminRole->permissions()->sync(Permission::all());
-        $adminRole->permissions()->sync(Permission::all());
+        $permissionPermissions = Permission::whereIn('name', [
+            'view-permissions', 'show-permissions', 'create-permissions', 'edit-permissions', 'download-permissions', 'delete-permissions',
+        ])->pluck('id');
 
-        $editorRole->permissions()->sync(
+        $leaderPermissions = Permission::whereIn('name', [
+            'view-anggota', 'show-anggota',
+        ])->pluck('id');
+
+        $adminPcPermissions = Permission::whereIn('name', [
+            'view-anggota', 'show-anggota', 'verify-anggota-pc',
+        ])->pluck('id');
+
+        $adminPdPermissions = Permission::whereIn('name', [
+            'view-anggota', 'show-anggota', 'validate-anggota-pd',
+        ])->pluck('id');
+
+        $adminPpPermissions = $userPermissions->merge($permissionPermissions)->merge(
             Permission::whereIn('name', [
-                'view-users', 'show-users',
-                'view-roles', 'show-roles',
-                'view-permissions', 'show-permissions'
+                'view-wilayah', 'show-wilayah', 'create-wilayah', 'edit-wilayah', 'download-wilayah', 'delete-wilayah',
+                'view-area',
+                'view-anggota', 'show-anggota', 'approve-anggota-pp',
             ])->pluck('id')
         );
 
-        $superAdmin = User::firstOrCreate(
-            ['email' => 'superadmin@example.com'],
-            [
-                'name' => 'Super Admin',
-                'password' => Hash::make('password'),
-            ]
-        );
+        $roles = [
+            ['slug' => Role::SUPER_ADMIN, 'name' => 'Super Admin', 'area' => Area::PUSAT, 'permissions' => 'all'],
+            ['slug' => Role::ADMIN_PP, 'name' => 'Admin PP', 'area' => Area::PUSAT, 'permissions' => 'admin-pp'],
+            ['slug' => Role::ADMIN_PD, 'name' => 'Admin PD', 'area' => Area::DAERAH, 'permissions' => 'admin-pd'],
+            ['slug' => Role::ADMIN_PC, 'name' => 'Admin PC', 'area' => Area::CABANG, 'permissions' => 'admin-pc'],
+            ['slug' => 'ketua-umum-pp', 'name' => 'Ketua Umum PP', 'area' => Area::PUSAT, 'permissions' => 'leader'],
+            ['slug' => 'sekretaris-jenderal-pp', 'name' => 'Sekretaris Jenderal PP', 'area' => Area::PUSAT, 'permissions' => 'leader'],
+            ['slug' => 'ketua-pd', 'name' => 'Ketua PD', 'area' => Area::DAERAH, 'permissions' => 'leader'],
+            ['slug' => 'sekretaris-pd', 'name' => 'Sekretaris PD', 'area' => Area::DAERAH, 'permissions' => 'leader'],
+            ['slug' => 'ketua-pc', 'name' => 'Ketua PC', 'area' => Area::CABANG, 'permissions' => 'leader'],
+            ['slug' => 'sekretaris-pc', 'name' => 'Sekretaris PC', 'area' => Area::CABANG, 'permissions' => 'leader'],
+            ['slug' => Role::ANGGOTA, 'name' => 'Anggota', 'area' => null, 'permissions' => 'none'],
+        ];
 
-        $superAdmin->roles()->sync([$superAdminRole->id]);
+        $keptSlugs = [];
 
-        $admin = User::firstOrCreate(
-            ['email' => 'admin@example.com'],
-            [
-                'name' => 'Admin User',
-                'password' => Hash::make('password'),
-            ]
-        );
+        foreach ($roles as $roleData) {
+            $role = Role::query()->updateOrCreate(
+                ['slug' => $roleData['slug']],
+                [
+                    'name' => $roleData['name'],
+                    'area' => $roleData['area'],
+                    'is_active' => true,
+                ]
+            );
 
-        $admin->roles()->sync([$adminRole->id]);
+            $permissionIds = match ($roleData['permissions']) {
+                'all' => Permission::pluck('id'),
+                'admin-pp' => $adminPpPermissions,
+                'admin-pd' => $adminPdPermissions,
+                'admin-pc' => $adminPcPermissions,
+                'leader' => $leaderPermissions,
+                default => collect(),
+            };
 
-        $editor = User::firstOrCreate(
-            ['email' => 'editor@example.com'],
-            [
-                'name' => 'Editor User',
-                'password' => Hash::make('password'),
-            ]
-        );
+            $role->permissions()->sync($permissionIds);
+            $keptSlugs[] = $role->slug;
+        }
 
-        $editor->roles()->sync([$editorRole->id]);
+        $this->removeLegacyRoles($keptSlugs);
+        $this->seedUsers();
+    }
 
-        $user = User::firstOrCreate(
-            ['email' => 'user@example.com'],
-            [
-                'name' => 'Regular User',
-                'password' => Hash::make('password'),
-            ]
-        );
+    /**
+     * @param  list<string>  $keptSlugs
+     */
+    private function removeLegacyRoles(array $keptSlugs): void
+    {
+        Role::query()
+            ->whereNotIn('slug', $keptSlugs)
+            ->get()
+            ->each(function (Role $role) {
+                $role->users()->detach();
+                $role->permissions()->detach();
+                $role->delete();
+            });
+    }
 
-        $user->roles()->sync([$userRole->id]);
+    private function seedUsers(): void
+    {
+        $accounts = [
+            ['email' => 'superadmin@example.com', 'name' => 'Super Admin', 'role' => Role::SUPER_ADMIN],
+            ['email' => 'admin@example.com', 'name' => 'Admin PP', 'role' => Role::ADMIN_PP],
+            ['email' => 'admin.pd@example.com', 'name' => 'Admin PD', 'role' => 'admin-pd'],
+            ['email' => 'admin.pc@example.com', 'name' => 'Admin PC', 'role' => 'admin-pc'],
+            ['email' => 'anggota@example.com', 'name' => 'Anggota', 'role' => 'anggota'],
+        ];
+
+        foreach ($accounts as $account) {
+            $user = User::query()->updateOrCreate(
+                ['email' => $account['email']],
+                [
+                    'name' => $account['name'],
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                    'pd_kode' => match ($account['role']) {
+                        Role::ADMIN_PD => '36',
+                        Role::ADMIN_PC => '36',
+                        default => null,
+                    },
+                    'pc_kode' => $account['role'] === Role::ADMIN_PC ? '36.71' : null,
+                ]
+            );
+
+            $role = Role::query()->where('slug', $account['role'])->firstOrFail();
+            $user->roles()->sync([$role->id]);
+        }
     }
 }

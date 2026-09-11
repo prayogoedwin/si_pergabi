@@ -1,44 +1,37 @@
-<x-layouts.auth>
-    <div
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="p-6">
-            <div class="mb-3">
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Register an account') }}</h1>
+<x-layouts.auth title="Daftar">
+    <div class="bg-[#fff8f1] rounded-2xl shadow-xl border border-white/20 overflow-hidden">
+        <div class="p-7">
+            <div class="mb-5 text-center">
+                <h1 class="text-2xl font-bold text-slate-800">Daftar</h1>
+                <p class="text-sm text-slate-500 mt-1">Buat akun untuk keanggotaan PERGABI</p>
             </div>
 
             <form method="POST" action="{{ route('register') }}" class="space-y-3">
                 @csrf
-                <!-- Full Name Input -->
                 <div>
-                    <x-forms.input label="Full Name" name="name" type="text" placeholder="{{ __('Full Name') }}" autofocus />
+                    <x-forms.input label="Nama lengkap" name="name" type="text" placeholder="Nama lengkap" autofocus />
                 </div>
 
-                <!-- Email Input -->
                 <div>
-                    <x-forms.input label="Email" name="email" type="email" placeholder="your@email.com" />
+                    <x-forms.input label="Email" name="email" type="email" placeholder="nama@email.com" />
                 </div>
 
-                <!-- Password Input -->
                 <div>
-                    <x-forms.input label="Password" name="password" type="password" placeholder="••••••••" />
+                    <x-forms.input label="Kata sandi" name="password" type="password" placeholder="••••••••" />
                 </div>
 
-                <!-- Confirm Password Input -->
                 <div>
-                    <x-forms.input label="Confirm Password" name="password_confirmation" type="password"
+                    <x-forms.input label="Konfirmasi kata sandi" name="password_confirmation" type="password"
                         placeholder="••••••••" />
                 </div>
 
-                <!-- Register Button -->
-                <x-button type="primary" class="w-full">{{ __('Create Account') }}</x-button>
+                <x-button type="primary" class="w-full !bg-saffron-600 hover:!bg-saffron-700 !py-3 !text-base">Daftar</x-button>
             </form>
 
-            <!-- Login Link -->
             <div class="text-center mt-6">
-                <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Already have an account?
-                    <a href="{{ route('login') }}"
-                        class="text-blue-600 dark:text-blue-400 hover:underline font-medium">{{ __('Sign in') }}</a>
+                <p class="text-sm text-slate-600">
+                    Sudah punya akun?
+                    <a href="{{ route('login') }}" class="text-saffron-600 hover:underline font-medium">Masuk</a>
                 </p>
             </div>
         </div>

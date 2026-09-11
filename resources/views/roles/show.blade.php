@@ -46,6 +46,28 @@
 
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ __('Area') }}
+                    </label>
+                    <div class="text-gray-900 dark:text-gray-100">
+                        {{ $role->areaLabel() }}
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {{ __('Status') }}
+                    </label>
+                    <div>
+                        @if($role->is_active)
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">Aktif</span>
+                        @else
+                            <span class="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300">Nonaktif</span>
+                        @endif
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                         {{ __('Created At') }}
                     </label>
                     <div class="text-gray-900 dark:text-gray-100">

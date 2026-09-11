@@ -39,6 +39,8 @@
                 <thead class="bg-gray-50 dark:bg-gray-900">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Name') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Area') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Status') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Created') }}</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Actions') }}</th>
                     </tr>
@@ -49,7 +51,6 @@
 
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.7/css/dataTables.tailwindcss.min.css">
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
 
     <script>
@@ -60,10 +61,12 @@
                 ajax: '{{ route('roles.index') }}',
                 columns: [
                     { data: 'name', name: 'name' },
+                    { data: 'area_label', name: 'area', orderable: false, searchable: false },
+                    { data: 'status', name: 'is_active', orderable: false, searchable: false },
                     { data: 'created_at', name: 'created_at' },
                     { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-right whitespace-nowrap' }
                 ],
-                order: [[1, 'desc']],
+                order: [[3, 'desc']],
                 language: {
                     search: "_INPUT_",
                     searchPlaceholder: "Search roles...",
@@ -78,6 +81,25 @@
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 stripeClasses: ['bg-white dark:bg-gray-800', 'bg-gray-50 dark:bg-gray-900']
+            });
+
+            $('#roles-table').on('click', '.toggle-role-status', function () {
+                const button = $(this);
+                fetch(button.data('url'), {
+                    method: 'PATCH',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                }).then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Unable to update role status');
+                    }
+                    $('#roles-table').DataTable().ajax.reload(null, false);
+                }).catch(function () {
+                    alert('Status role tidak bisa diubah.');
+                });
             });
         });
     </script>

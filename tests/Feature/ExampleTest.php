@@ -14,5 +14,12 @@ class ExampleTest extends TestCase
         $response = $this->get('/');
 
         $response->assertStatus(200);
+        $response->assertSee('PERGABI');
+        $response->assertSee('Perkumpulan Guru Agama Buddha Indonesia');
+        $response->assertSee('Daftar');
+        $response->assertSee('Masuk');
+        $response->assertDontSee('Laravel has an incredibly rich ecosystem');
+        $response->assertDontSee('Laracasts');
+        $response->assertDontSee('Deploy now');
     }
 }

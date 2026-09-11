@@ -59,125 +59,21 @@ return [
     |
     */
 
-    'duotone' => [
+    'duotone' => false,
 
-        'prefix' => 'fad',
+    'light' => false,
 
-        'fallback' => '',
+    'thin' => false,
 
-        'class' => '',
+    'sharp-light' => false,
 
-        'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
-        ],
+    'sharp-regular' => false,
 
-    ],
+    'sharp-solid' => false,
 
-    'light' => [
+    'sharp-duotone-solid' => false,
 
-        'prefix' => 'fal',
-
-        'fallback' => '',
-
-        'class' => '',
-
-        'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
-        ],
-
-    ],
-
-    'thin' => [
-
-        'prefix' => 'fat',
-
-        'fallback' => '',
-
-        'class' => '',
-
-        'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
-        ],
-
-    ],
-
-    'sharp-light' => [
-
-        'prefix' => 'fal:sharp',
-
-        'fallback' => '',
-
-        'class' => '',
-
-        'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
-        ],
-
-    ],
-
-    'sharp-regular' => [
-
-        'prefix' => 'far:sharp',
-
-        'fallback' => '',
-
-        'class' => '',
-
-        'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
-        ],
-
-    ],
-
-    'sharp-solid' => [
-
-        'prefix' => 'fas:sharp',
-
-        'fallback' => '',
-
-        'class' => '',
-
-        'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
-        ],
-
-    ],
-
-    'sharp-duotone-solid' => [
-
-        'prefix' => 'fad:sharp',
-
-        'fallback' => '',
-
-        'class' => '',
-
-        'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
-        ],
-
-    ],
-
-    'sharp-thin' => [
-
-        'prefix' => 'fat:sharp',
-
-        'fallback' => '',
-
-        'class' => '',
-
-        'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
-        ],
-
-    ],
+    'sharp-thin' => false,
 
     /*
     |-----------------------------------------------------------------
@@ -191,19 +87,6 @@ return [
     |
     */
 
-    'custom' => [
-
-        'prefix' => 'fak',
-
-        'fallback' => '',
-
-        'class' => '',
-
-        'attributes' => [
-            // 'width' => 50,
-            // 'height' => 50,
-        ],
-
-    ],
+    'custom-icons' => false,
 
 ];

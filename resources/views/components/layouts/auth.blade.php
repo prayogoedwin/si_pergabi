@@ -1,76 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
+@props(['title' => 'Masuk'])
 
+<!DOCTYPE html>
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - {{ config('app.name') }}</title>
-    
-    <!-- Dynamic Favicon -->
-    @php
-        $appName = config('app.name', 'App');
-        $initials = collect(explode(' ', $appName))
-            ->map(fn($word) => strtoupper(substr($word, 0, 1)))
-            ->take(3)
-            ->implode('');
-    @endphp
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
-        %3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E
-            %3Crect width='100' height='100' rx='20' fill='%232563eb'/%3E
-            %3Ctext x='50' y='50' text-anchor='middle' dy='0.35em' font-family='Arial, sans-serif' font-size='45' font-weight='bold' fill='white'%3E{{ $initials }}%3C/text%3E
-        %3C/svg%3E">
-    
-    <!-- Tailwind CSS CDN -->
+    <title>{{ $title }} — PERGABI</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo-pergabi.png') }}">
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=be-vietnam-pro:400,500,600,700|cormorant-garamond:600,700" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Alpine.js CDN -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    
-    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
-            darkMode: 'class'
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Be Vietnam Pro', 'sans-serif'],
+                        display: ['Cormorant Garamond', 'serif'],
+                    },
+                    colors: {
+                        saffron: {
+                            500: '#ee6b24',
+                            600: '#e25a12',
+                            700: '#c94b10',
+                        },
+                    },
+                },
+            },
         }
     </script>
-    
-    <script>
-        function applyTheme() {
-            const userPref = localStorage.getItem('darkMode');
-            const systemPref = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            if (userPref === 'true' || (userPref === null && systemPref)) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
+    <style>
+        body {
+            font-family: "Be Vietnam Pro", sans-serif;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 0%, rgba(238, 107, 36, 0.24), transparent 55%),
+                radial-gradient(ellipse 60% 40% at 50% 100%, rgba(30, 79, 215, 0.22), transparent 55%),
+                linear-gradient(165deg, #06101c 0%, #0c2244 48%, #1a1230 100%);
         }
-        // Initial theme application
-        applyTheme();
-        // Listen for system theme changes
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-            if (!('darkMode' in localStorage)) {
-                applyTheme();
-            }
-        });
-    </script>
+    </style>
 </head>
-
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased" x-data="{
-    darkMode: localStorage.getItem('darkMode') === 'true',
-    toggleDarkMode() {
-        this.darkMode = !this.darkMode;
-        localStorage.setItem('darkMode', this.darkMode);
-    }
-}"
-    :class="{ 'dark': darkMode }">
-
-    <div class="min-h-screen flex flex-col">
-        <!-- Main Content -->
-        <main class="flex-1 flex items-center justify-center p-6">
-            <div class="w-full max-w-md">
-                {{ $slot }}
-            </div>
+<body class="min-h-screen text-slate-800 antialiased">
+    <div class="min-h-screen flex flex-col items-center justify-center p-6">
+        <a href="{{ route('home') }}" class="mb-5 text-center group">
+            <img src="{{ asset('images/logo-pergabi.png') }}" alt="Lambang PERGABI" class="w-20 h-20 mx-auto object-contain drop-shadow-lg">
+            <p class="mt-2 font-display text-3xl tracking-[0.18em] text-[#fff6ea] group-hover:text-[#f0c14b] transition-colors">PERGABI</p>
+        </a>
+        <main class="w-full max-w-md">
+            {{ $slot }}
         </main>
     </div>
 </body>
-
 </html>

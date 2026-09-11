@@ -30,6 +30,26 @@
                 </div>
 
                 <div class="mb-6">
+                    <label for="area" class="block ml-1 text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{{ __('Area') }}</label>
+                    <select id="area" name="area"
+                        class="w-full px-4 py-1.5 rounded-lg text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">{{ __('Tanpa area') }}</option>
+                        @foreach($areas as $code => $label)
+                            <option value="{{ $code }}" @selected(old('area') === $code)>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                    @error('area')
+                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="mb-6">
+                    <input type="hidden" name="is_active" value="0">
+                    <x-forms.checkbox name="is_active" value="1" label="Aktif" :checked="old('is_active', '1') == '1'" />
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Role nonaktif tidak muncul di form user.') }}</p>
+                </div>
+
+                <div class="mb-6">
                     <div class="flex justify-between items-center mb-3">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                             {{ __('Permissions') }}

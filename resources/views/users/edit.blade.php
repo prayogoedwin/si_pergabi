@@ -44,25 +44,7 @@
                 </div>
 
                 <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        {{ __('Roles') }}
-                    </label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-gray-50 dark:bg-gray-900 p-4 rounded-md">
-                        @forelse($roles as $role)
-                            <div>
-                                <x-forms.checkbox 
-                                    name="roles[]" 
-                                    value="{{ $role->id }}" 
-                                    label="{{ $role->name }}"
-                                    :checked="in_array($role->id, old('roles', $user->roles->pluck('id')->toArray()))" />
-                            </div>
-                        @empty
-                            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No roles available.') }}</p>
-                        @endforelse
-                    </div>
-                    @error('roles')
-                        <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
-                    @enderror
+                    @include('users._wilayah')
                 </div>
 
                 <div class="flex gap-3">

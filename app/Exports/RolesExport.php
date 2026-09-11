@@ -11,7 +11,7 @@ class RolesExport implements FromCollection, WithHeadings, WithMapping
 {
     public function collection()
     {
-        return Role::withCount('users', 'permissions')->get();
+        return Role::query()->visibleTo(auth()->user())->withCount('users', 'permissions')->get();
     }
 
     public function headings(): array
@@ -19,6 +19,8 @@ class RolesExport implements FromCollection, WithHeadings, WithMapping
         return [
             'ID',
             'Name',
+            'Area',
+            'Status',
             'Total Users',
             'Total Permissions',
             'Created At',
@@ -30,6 +32,8 @@ class RolesExport implements FromCollection, WithHeadings, WithMapping
         return [
             $role->id,
             $role->name,
+            $role->areaLabel(),
+            $role->is_active ? 'Aktif' : 'Nonaktif',
             $role->users_count,
             $role->permissions_count,
             $role->created_at->format('Y-m-d H:i:s'),
