@@ -62,6 +62,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('settings/pendaftaran', [Settings\PendaftaranSettingController::class, 'update'])->name('settings.pendaftaran.update')->middleware('permission:edit-pendaftaran');
     Route::get('settings/integrasi', [Settings\IntegrasiSettingController::class, 'edit'])->name('settings.integrasi.edit')->middleware('permission:view-integrasi');
     Route::put('settings/integrasi', [Settings\IntegrasiSettingController::class, 'update'])->name('settings.integrasi.update')->middleware('permission:edit-integrasi');
+    Route::post('settings/integrasi/test-smtp', [Settings\IntegrasiSettingController::class, 'testSmtp'])->name('settings.integrasi.test-smtp')->middleware('permission:edit-integrasi');
     Route::get('settings/organisasi', [Settings\OrganisasiSettingController::class, 'edit'])->name('settings.organisasi.edit')->middleware('permission:view-organisasi');
     Route::put('settings/organisasi', [Settings\OrganisasiSettingController::class, 'update'])->name('settings.organisasi.update')->middleware('permission:edit-organisasi');
     Route::get('cache', [CacheController::class, 'index'])->name('cache.index')->middleware('permission:view-cache');

@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Settings;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\TestIntegrasiSmtpRequest;
 use App\Http\Requests\UpdateIntegrasiSettingRequest;
+use App\Mail\SmtpTestMail;
 use App\Services\SettingService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Throwable;
 
 class IntegrasiSettingController extends Controller
 {
@@ -38,5 +43,39 @@ class IntegrasiSettingController extends Controller
         $settings->applyGoogleConfig();
 
         return back()->with('status', 'Pengaturan integrasi disimpan.');
+    }
+
+    public function testSmtp(TestIntegrasiSmtpRequest $request, SettingService $settings): RedirectResponse
+    {
+        $settings->applyMailConfig();
+
+        $to = $request->string('email')->toString();
+        $mailer = (string) config('mail.default');
+
+        try {
+            Mail::to($to)->send(new SmtpTestMail($mailer));
+        } catch (Throwable $e) {
+            report($e);
+
+            return back()
+                ->withInput()
+                ->with('smtp_error', 'Gagal mengirim email uji: '.$this->safeMailError($e));
+        }
+
+        $note = match ($mailer) {
+            'log' => ' Mailer sedang "Log (uji lokal)", jadi pesan hanya dicatat di log server, bukan lewat SMTP. Ganti ke SMTP, simpan, lalu uji lagi.',
+            'array' => ' Mailer array (mode uji) — pengiriman dianggap berhasil tanpa SMTP nyata.',
+            default => ' Cek kotak masuk dan folder spam.',
+        };
+
+        return back()->with('status', "Email uji terkirim ke {$to}.".$note);
+    }
+
+    private function safeMailError(Throwable $e): string
+    {
+        $message = $e->getMessage();
+        $message = preg_replace('/passwor(d|t)\s*[=:].+/i', 'password=***', $message) ?? $message;
+
+        return Str::limit($message, 180);
     }
 }
