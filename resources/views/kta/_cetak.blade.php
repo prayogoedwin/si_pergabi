@@ -1,4 +1,4 @@
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+@include('kta._qr-client')
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
     @media print {
@@ -29,23 +29,26 @@
 <script>
     const verifikasiUrl = @js($verifikasiUrl);
 
-    document.querySelectorAll('[data-kta-qr]').forEach((canvas) => {
-        if (window.QRCode) {
-            QRCode.toCanvas(canvas, verifikasiUrl, { width: 160, margin: 1, color: { dark: '#071422', light: '#ffffff' } });
-        }
-    });
+    function renderKtaQr() {
+        return window.drawPergabiQrAll('[data-kta-qr]', verifikasiUrl, 160);
+    }
+
+    renderKtaQr();
 
     window.printKta = function (mode) {
-        document.body.classList.remove('print-id', 'print-a4');
-        document.body.classList.add(mode === 'a4' ? 'print-a4' : 'print-id');
-        window.print();
+        renderKtaQr().then(function () {
+            document.body.classList.remove('print-id', 'print-a4');
+            document.body.classList.add(mode === 'a4' ? 'print-a4' : 'print-id');
+            window.print();
+        });
     };
 
     window.unduhPng = async function () {
         const card = document.getElementById('kta-front');
-        if (!card || !window.html2canvas) {
+        if (! card || ! window.html2canvas) {
             return;
         }
+        await renderKtaQr();
         const canvas = await html2canvas(card, { scale: 3, backgroundColor: '#ffffff', useCORS: true });
         const link = document.createElement('a');
         link.download = @js('kta-'.$anggota->nomor_anggota.'.png');

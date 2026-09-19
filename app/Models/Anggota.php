@@ -203,6 +203,47 @@ class Anggota extends Model
         ])));
     }
 
+    public function labelPdPergabi(): string
+    {
+        $nama = $this->pd?->nama ?? $this->pd_kode;
+
+        return filled($nama) ? 'PD PERGABI '.$nama : '—';
+    }
+
+    public function ttlLabel(): string
+    {
+        $ttl = trim(collect([
+            $this->tempat_lahir,
+            $this->tanggal_lahir?->locale('id')->translatedFormat('d F Y'),
+        ])->filter()->implode(', '));
+
+        return $ttl !== '' ? $ttl : '—';
+    }
+
+    public function instansiLabel(): string
+    {
+        return filled($this->nama_sekolah) ? (string) $this->nama_sekolah : '—';
+    }
+
+    public function alamatLabel(): string
+    {
+        return filled($this->alamat) ? (string) $this->alamat : '—';
+    }
+
+    public function masaBerlakuLabel(): string
+    {
+        return $this->masa_berlaku_hingga?->locale('id')->translatedFormat('d F Y') ?: '—';
+    }
+
+    public function tanggalVerifikasiLabel(): string
+    {
+        $log = $this->relationLoaded('statusLogs')
+            ? $this->statusLogs->where('status_ke', self::STATUS_AKTIF)->sortBy('created_at')->first()
+            : $this->statusLogs()->where('status_ke', self::STATUS_AKTIF)->oldest()->first();
+
+        return $log?->created_at?->locale('id')->translatedFormat('d F Y') ?: '—';
+    }
+
     public function isAktif(): bool
     {
         return $this->status === self::STATUS_AKTIF;
@@ -211,6 +252,39 @@ class Anggota extends Model
     public function canAccessKartuDigital(): bool
     {
         return $this->isAktif() && filled($this->nomor_anggota);
+    }
+
+    public function canAccessQrCode(): bool
+    {
+        return filled($this->nomor_anggota);
+    }
+
+    public static function urlVerifikasiQrFor(?string $nomor): ?string
+    {
+        if (! filled($nomor)) {
+            return null;
+        }
+
+        return url('/verifikasi-qr-anggota').'/?kode='.rawurlencode($nomor);
+    }
+
+    public static function urlFotoVerifikasiQrFor(?string $nomor): ?string
+    {
+        if (! filled($nomor)) {
+            return null;
+        }
+
+        return url('/verifikasi-qr-anggota/foto').'/?kode='.rawurlencode($nomor);
+    }
+
+    public function urlVerifikasiQr(): ?string
+    {
+        return self::urlVerifikasiQrFor($this->nomor_anggota);
+    }
+
+    public function urlFotoVerifikasiQr(): ?string
+    {
+        return self::urlFotoVerifikasiQrFor($this->nomor_anggota);
     }
 
     /**

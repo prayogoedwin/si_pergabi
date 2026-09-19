@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Services\SettingService;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,9 +15,11 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
-    public function create(): View
+    public function create(SettingService $settings): View
     {
-        return view('auth.login');
+        return view('auth.login', [
+            'googleLogin' => $settings->googleLoginEnabled(),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

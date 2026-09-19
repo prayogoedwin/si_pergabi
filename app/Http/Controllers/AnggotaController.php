@@ -80,9 +80,23 @@ class AnggotaController extends Controller
             'canValidatePd' => $this->canAct($request, 'validate-anggota-pd') && $anggota->status === Anggota::STATUS_MENUNGGU_VALIDASI_PD,
             'canApprovePp' => $this->canAct($request, 'approve-anggota-pp') && $anggota->status === Anggota::STATUS_MENUNGGU_PERSETUJUAN_PP,
             'unlocked' => $unlocked,
-            'verifikasiUrl' => $unlocked ? route('kta.verifikasi', $anggota->nomor_anggota) : null,
+            'verifikasiUrl' => $unlocked ? $anggota->urlVerifikasiQr() : null,
             'identitas' => app(SettingService::class)->identitas(),
-            'fotoUrl' => $unlocked ? route('kta.foto', $anggota->nomor_anggota) : null,
+            'fotoUrl' => $unlocked ? $anggota->urlFotoVerifikasiQr() : null,
+        ]);
+    }
+
+    public function qr(Request $request, Anggota $anggota): View
+    {
+        abort_unless($request->user()?->hasPermission('show-anggota') || $request->user()?->isSuperAdmin(), 403);
+        abort_unless($request->user()->canAccessAnggota($anggota), 403);
+
+        $unlocked = $anggota->canAccessQrCode();
+
+        return view('anggota.qr', [
+            'anggota' => $anggota,
+            'unlocked' => $unlocked,
+            'verifikasiUrl' => $unlocked ? $anggota->urlVerifikasiQr() : null,
         ]);
     }
 

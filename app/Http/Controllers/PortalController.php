@@ -50,9 +50,27 @@ class PortalController extends Controller
         return view('portal.kta', [
             'anggota' => $anggota,
             'unlocked' => $unlocked,
-            'verifikasiUrl' => $unlocked ? route('kta.verifikasi', $anggota->nomor_anggota) : null,
+            'verifikasiUrl' => $unlocked ? $anggota->urlVerifikasiQr() : null,
             'identitas' => app(SettingService::class)->identitas(),
             'fotoUrl' => route('portal.foto'),
+        ]);
+    }
+
+    public function qr(Request $request): View|RedirectResponse
+    {
+        $redirect = $this->redirectPengurus($request);
+
+        if ($redirect) {
+            return $redirect;
+        }
+
+        $anggota = $this->anggota($request);
+        $unlocked = $anggota->canAccessQrCode();
+
+        return view('portal.qr', [
+            'anggota' => $anggota,
+            'unlocked' => $unlocked,
+            'verifikasiUrl' => $unlocked ? $anggota->urlVerifikasiQr() : null,
         ]);
     }
 

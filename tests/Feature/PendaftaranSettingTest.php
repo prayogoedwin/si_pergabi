@@ -25,17 +25,18 @@ class PendaftaranSettingTest extends TestCase
             ->get(route('settings.pendaftaran.edit'))
             ->assertOk()
             ->assertSee('Tipe pendaftaran')
-            ->assertSee('Fonnte');
+            ->assertSee('Integrasi')
+            ->assertDontSee('API token');
+
+        app(SettingService::class)->putMany([
+            'whatsapp.fonnte_token' => 'token-baru',
+        ]);
 
         $this->actingAs($this->superAdmin())
             ->put(route('settings.pendaftaran.update'), [
                 'pendaftaran_tipe' => SettingService::TIPE_VERIFIKASI,
                 'email_aktif' => '1',
                 'whatsapp_aktif' => '1',
-                'fonnte_token' => 'token-baru',
-                'mail_mailer' => 'log',
-                'mail_from_address' => 'noreply@pergabi.test',
-                'mail_from_name' => 'PERGABI',
             ])
             ->assertRedirect();
 
@@ -55,10 +56,19 @@ class PendaftaranSettingTest extends TestCase
                 'pendaftaran_tipe' => SettingService::TIPE_VERIFIKASI,
                 'email_aktif' => '0',
                 'whatsapp_aktif' => '0',
-                'mail_mailer' => 'log',
-                'mail_from_address' => 'noreply@pergabi.test',
             ])
             ->assertSessionHasErrors('email_aktif');
+    }
+
+    public function test_whatsapp_channel_requires_fonnte_token(): void
+    {
+        $this->actingAs($this->superAdmin())
+            ->put(route('settings.pendaftaran.update'), [
+                'pendaftaran_tipe' => SettingService::TIPE_VERIFIKASI,
+                'email_aktif' => '0',
+                'whatsapp_aktif' => '1',
+            ])
+            ->assertSessionHasErrors('whatsapp_aktif');
     }
 
     public function test_admin_pp_can_access_settings(): void

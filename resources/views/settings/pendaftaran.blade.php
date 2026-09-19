@@ -1,7 +1,7 @@
 <x-layouts.app>
     <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Pengaturan pendaftaran</h1>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">Tipe pendaftaran, kanal verifikasi, email, dan token WhatsApp Fonnte.</p>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">Tipe pendaftaran dan kanal verifikasi.@if (auth()->user()?->hasPermission('view-integrasi')) Token Fonnte, SMTP, dan login Google ada di menu <a href="{{ route('settings.integrasi.edit') }}" class="text-blue-600 hover:underline">Integrasi</a>.@endif</p>
     </div>
 
     <form method="POST" action="{{ route('settings.pendaftaran.update') }}" class="space-y-6" x-data="{ tipe: @js($values['pendaftaran_tipe']), emailAktif: @js((bool) $values['email_aktif']), waAktif: @js((bool) $values['whatsapp_aktif']) }">
@@ -46,62 +46,6 @@
                     <input type="checkbox" name="whatsapp_aktif" value="1" x-model="waAktif" @checked(old('whatsapp_aktif', $values['whatsapp_aktif']))>
                 </label>
             </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold mb-4">Email</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium mb-1">Mailer</label>
-                    <select name="mail_mailer" class="w-full" data-search="off">
-                        @foreach (['smtp' => 'SMTP', 'log' => 'Log (uji lokal)', 'sendmail' => 'Sendmail'] as $value => $label)
-                            <option value="{{ $value }}" @selected(old('mail_mailer', $values['mail_mailer']) === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Host</label>
-                    <input name="mail_host" value="{{ old('mail_host', $values['mail_host']) }}" class="w-full rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Port</label>
-                    <input name="mail_port" value="{{ old('mail_port', $values['mail_port']) }}" class="w-full rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Enkripsi / scheme</label>
-                    <select name="mail_scheme" class="w-full" data-search="off">
-                        <option value="">Tidak ada</option>
-                        @foreach (['tls' => 'TLS', 'smtps' => 'SMTPS'] as $value => $label)
-                            <option value="{{ $value }}" @selected(old('mail_scheme', $values['mail_scheme']) === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Username</label>
-                    <input name="mail_username" value="{{ old('mail_username', $values['mail_username']) }}" class="w-full rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" name="mail_password" placeholder="{{ $values['mail_password_tersimpan'] ? 'Tersimpan. Kosongkan jika tidak diubah.' : '' }}" class="w-full rounded-lg">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Email pengirim</label>
-                    <input type="email" name="mail_from_address" value="{{ old('mail_from_address', $values['mail_from_address']) }}" class="w-full rounded-lg">
-                    @error('mail_from_address')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label class="block text-sm font-medium mb-1">Nama pengirim</label>
-                    <input name="mail_from_name" value="{{ old('mail_from_name', $values['mail_from_name']) }}" class="w-full rounded-lg">
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-            <h2 class="text-lg font-semibold mb-4">WhatsApp (Fonnte)</h2>
-            <p class="text-sm text-gray-500 mb-4">Token API dari <a href="https://fonnte.com" class="text-blue-600 hover:underline" target="_blank" rel="noreferrer">Fonnte</a>. Dipakai untuk OTP verifikasi.</p>
-            <label class="block text-sm font-medium mb-1">API token</label>
-            <input type="password" name="fonnte_token" placeholder="{{ $values['fonnte_token_tersimpan'] ? 'Tersimpan. Kosongkan jika tidak diubah.' : 'Token Fonnte' }}" class="w-full rounded-lg">
-            @error('fonnte_token')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
         </div>
 
         <div>

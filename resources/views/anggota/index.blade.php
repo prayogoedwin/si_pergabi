@@ -60,8 +60,9 @@
                         <td class="px-4 py-3 text-sm text-navy-800/70 dark:text-cream-100/70">{{ $row->nik }}</td>
                         <td class="px-4 py-3 text-sm text-navy-800/70 dark:text-cream-100/70">{{ $row->pd?->nama }} / {{ $row->pc?->nama }}</td>
                         <td class="px-4 py-3 text-sm text-navy-800 dark:text-cream-100">{{ $row->statusLabel() }}</td>
-                        <td class="px-4 py-3 text-right">
+                        <td class="px-4 py-3 text-right whitespace-nowrap">
                             <a href="{{ route('anggota.show', $row) }}" class="text-sm text-navy-800 hover:underline dark:text-gold-400">Detail</a>
+                            <a href="{{ route('anggota.qr', $row) }}" class="ml-3 text-sm text-navy-800 hover:underline dark:text-gold-400">QR</a>
                         </td>
                     </tr>
                 @empty

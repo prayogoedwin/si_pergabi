@@ -42,8 +42,8 @@
             wilayahUrl: @js(route('daftar.wilayah')),
             csrf: @js(csrf_token()),
             verifikasi: @js($wizardConfig),
+            email: @js(session('google_email')),
         })"
-        x-cloak
         @change="persist()">
         <script type="application/json" id="wizard-config">@json($wizardConfig)</script>
         <header class="max-w-4xl mx-auto mb-6 flex items-center justify-between gap-4">
@@ -61,6 +61,11 @@
             <div class="px-5 sm:px-8 pt-6 pb-4 border-b border-orange-100">
                 <h1 class="font-display text-3xl sm:text-4xl text-slate-900">Formulir pendaftaran</h1>
                 <p class="text-sm text-slate-600 mt-1">Isian tersimpan otomatis di perangkat Anda. Jika koneksi terputus, Anda bisa lanjut tanpa mulai dari awal.</p>
+                @if (session('status'))
+                    <div class="mt-3 rounded-xl border border-saffron-600/30 bg-orange-50 px-4 py-3 text-sm text-saffron-700">
+                        {{ session('status') }}
+                    </div>
+                @endif
                 <p class="text-xs text-saffron-700 mt-2" x-show="savedAt">
                     Draf tersimpan <span x-text="savedAt ? new Date(savedAt).toLocaleString('id-ID') : ''"></span>
                 </p>
@@ -155,7 +160,7 @@
                     </div>
                 </section>
 
-                <section x-show="step === 2" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <section x-show="step === 2" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">HP <span class="text-red-600">*</span></label>
                         <input x-model="form.hp" class="w-full rounded-xl border-slate-300 px-4 py-2.5 bg-white">
@@ -224,7 +229,7 @@
                     </div>
                 </section>
 
-                <section x-show="step === 3" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <section x-show="step === 3" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium mb-1">Status guru <span class="text-red-600">*</span></label>
                         <select x-model="form.status_guru" class="w-full rounded-xl border-slate-300 px-4 py-2.5 bg-white">
@@ -288,7 +293,7 @@
                     </div>
                 </section>
 
-                <section x-show="step === 4" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <section x-show="step === 4" x-cloak class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     @php
                         $dokumenFields = [
                             'pas_foto' => ['label' => 'Pas foto', 'required' => true, 'image' => true],
@@ -321,7 +326,7 @@
                     <p class="sm:col-span-2 text-xs text-slate-500">Pas foto wajib gambar. KTP, SK, dan ijazah boleh JPG, PNG, atau PDF. Maksimal 2 MB per berkas.</p>
                 </section>
 
-                <section x-show="step === 5" class="space-y-4">
+                <section x-show="step === 5" x-cloak class="space-y-4">
                     <div class="rounded-2xl bg-white border border-orange-100 p-4 text-sm space-y-1">
                         <p class="font-semibold text-slate-900">Ringkasan</p>
                         <p x-text="`${form.nama} · NIK ${form.nik}`"></p>

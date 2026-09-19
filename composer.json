@@ -13,6 +13,7 @@
         "blade-ui-kit/blade-icons": "^1.10",
         "laravel/framework": "^13.0",
         "laravel/sanctum": "^4.3",
+        "laravel/socialite": "^5.31",
         "laravel/tinker": "^3.0",
         "maatwebsite/excel": "^4.0",
         "owenvoke/blade-fontawesome": "^3.3",

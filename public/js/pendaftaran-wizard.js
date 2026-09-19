@@ -58,6 +58,9 @@ window.PergabiPendaftaran = function (config) {
 
         async init() {
             this.restore();
+            if (config.email) {
+                this.form.email = config.email;
+            }
             if (!this.form.kanal_verifikasi) {
                 this.form.kanal_verifikasi = this.verifikasi.defaultKanal || '';
             }
@@ -261,6 +264,8 @@ window.PergabiPendaftaran = function (config) {
                 || String(stored.name || '').toLowerCase().endsWith('.pdf')
                 || String(stored.data || '').startsWith('data:application/pdf');
         },
+
+        fieldError(name) {
             const messages = this.errors[name];
             if (!messages) {
                 return '';

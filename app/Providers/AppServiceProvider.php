@@ -27,6 +27,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Event::listen(Verified::class, AdvanceAnggotaAfterEmailVerified::class);
         Anggota::observe(AnggotaObserver::class);
-        $this->app->make(SettingService::class)->applyMailConfig();
+        $settings = $this->app->make(SettingService::class);
+        $settings->applyMailConfig();
+        $settings->applyGoogleConfig();
     }
 }

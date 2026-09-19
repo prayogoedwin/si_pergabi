@@ -1,9 +1,5 @@
 @php
     $tanggalTerbit = ($anggota->tanggal_bergabung ?? now())->locale('id')->translatedFormat('d F Y');
-    $ttl = trim(collect([
-        $anggota->tempat_lahir,
-        $anggota->tanggal_lahir?->locale('id')->translatedFormat('d F Y'),
-    ])->filter()->implode(', '));
 @endphp
 
 @include('kta._kartu-style')
@@ -17,6 +13,8 @@
     </div>
     <p class="kta-nama">{{ $anggota->namaLengkap() }}</p>
     <p class="kta-nomor">{{ $anggota->nomor_anggota }}</p>
+    <p class="kta-pd">{{ $anggota->labelPdPergabi() }}</p>
+    <p class="kta-berlaku">Berlaku s.d. {{ $anggota->masaBerlakuLabel() }}</p>
     <div class="kta-foto">
         @if (! empty($fotoUrl))
             <img src="{{ $fotoUrl }}" alt="Foto {{ $anggota->namaLengkap() }}">
@@ -33,9 +31,9 @@
         <div>{{ $anggota->namaLengkap() }}</div>
         <div>{{ $anggota->nomor_anggota }}</div>
         <div>{{ $anggota->nik }}</div>
-        <div>{{ $ttl !== '' ? $ttl : '—' }}</div>
-        <div>{{ $anggota->nama_sekolah ?: '—' }}</div>
-        <div>{{ $anggota->alamat ?: '—' }}</div>
+        <div>{{ $anggota->ttlLabel() }}</div>
+        <div>{{ $anggota->instansiLabel() }}</div>
+        <div>{{ $anggota->alamatLabel() }}</div>
     </div>
     <p class="kta-tanggal">Jakarta, {{ $tanggalTerbit }}</p>
     <div class="kta-ttd-area">

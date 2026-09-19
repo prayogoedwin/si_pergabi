@@ -13,12 +13,15 @@
                 <p class="mt-2 font-semibold">Nomor anggota {{ $anggota->nomor_anggota }}</p>
             @endif
         </div>
-        @if ($anggota->user)
-            <form action="{{ route('anggota.reset-password', $anggota) }}" method="POST" onsubmit="return confirm('Reset password akun login anggota ini? Password baru akan ditampilkan sekali.')">
-                @csrf
-                <x-button type="secondary">Reset password</x-button>
-            </form>
-        @endif
+        <div class="flex flex-wrap items-center gap-2">
+            <a href="{{ route('anggota.qr', $anggota) }}" class="inline-flex items-center rounded-lg bg-navy-900 px-4 py-2 text-sm font-medium text-cream-100 hover:bg-navy-800">QR Code</a>
+            @if ($anggota->user)
+                <form action="{{ route('anggota.reset-password', $anggota) }}" method="POST" onsubmit="return confirm('Reset password akun login anggota ini? Password baru akan ditampilkan sekali.')">
+                    @csrf
+                    <x-button type="secondary">Reset password</x-button>
+                </form>
+            @endif
+        </div>
     </div>
 
     @if ($errors->any())

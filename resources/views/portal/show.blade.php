@@ -70,6 +70,17 @@
         <span class="text-xl">›</span>
     </a>
 
+    <a href="{{ route('portal.qr') }}"
+        class="mt-3 flex items-center justify-between rounded-2xl p-4 {{ $anggota->canAccessQrCode() ? 'bg-navy-900 text-cream-100' : 'bg-white border border-gold-400/25' }}">
+        <div>
+            <p class="font-semibold {{ $anggota->canAccessQrCode() ? '' : 'text-navy-900' }}">QR Code anggota</p>
+            <p class="text-xs mt-1 {{ $anggota->canAccessQrCode() ? 'text-cream-100/75' : 'text-navy-800/60' }}">
+                {{ $anggota->canAccessQrCode() ? 'Pindai untuk verifikasi kartu' : 'Tersedia setelah nomor anggota terbit' }}
+            </p>
+        </div>
+        <span class="text-xl">›</span>
+    </a>
+
     <section class="mt-4 rounded-2xl bg-white border border-gold-400/25 p-4">
         <h2 class="text-sm font-semibold">Data saya</h2>
         <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">

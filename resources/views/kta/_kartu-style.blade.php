@@ -56,6 +56,30 @@
         font-weight: 800;
         letter-spacing: 0.04em;
     }
+    .kta-pd {
+        position: absolute;
+        top: 63.6%;
+        left: 26%;
+        right: 26%;
+        text-align: center;
+        color: #0c2244;
+        font-size: 2.05cqi;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        line-height: 1.15;
+        text-transform: uppercase;
+    }
+    .kta-berlaku {
+        position: absolute;
+        top: 68.4%;
+        left: 26%;
+        right: 26%;
+        text-align: center;
+        color: #0c2244;
+        font-size: 1.85cqi;
+        font-weight: 700;
+        line-height: 1.15;
+    }
     .kta-foto {
         position: absolute;
         left: 7.6%;
@@ -100,8 +124,14 @@
         aspect-ratio: 1;
         background: #fff;
         padding: 0.6cqi;
+        z-index: 3;
     }
-    .kta-qr canvas { width: 100%; height: 100%; display: block; }
+    .kta-qr canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        image-rendering: pixelated;
+    }
     .kta-nilai {
         position: absolute;
         top: 16.8%;

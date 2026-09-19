@@ -57,6 +57,8 @@
                     class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.show') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">Beranda</a>
                 <a href="{{ route('portal.kta') }}"
                     class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.kta') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">Kartu digital</a>
+                <a href="{{ route('portal.qr') }}"
+                    class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.qr') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">QR Code</a>
                 <a href="{{ route('portal.profil') }}"
                     class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.profil') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">Profil</a>
             </div>
@@ -74,7 +76,7 @@
     </main>
 
     <nav class="portal-chrome md:hidden fixed bottom-0 inset-x-0 z-30 bg-navy-900 border-t border-gold-400/25 pb-[env(safe-area-inset-bottom)]">
-        <div class="grid grid-cols-3 text-center text-[11px]">
+        <div class="grid grid-cols-4 text-center text-[11px]">
             <a href="{{ route('portal.show') }}" class="py-2.5 {{ request()->routeIs('portal.show') ? 'text-gold-400' : 'text-cream-100/70' }}">
                 <svg class="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10.5 12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/></svg>
                 Beranda
@@ -82,6 +84,10 @@
             <a href="{{ route('portal.kta') }}" class="py-2.5 {{ request()->routeIs('portal.kta') ? 'text-gold-400' : 'text-cream-100/70' }}">
                 <svg class="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 10h.01M8 14h8"/></svg>
                 Kartu
+            </a>
+            <a href="{{ route('portal.qr') }}" class="py-2.5 {{ request()->routeIs('portal.qr') ? 'text-gold-400' : 'text-cream-100/70' }}">
+                <svg class="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M8 8h3v3H8V8zm5 5h3v3h-3v-3z"/></svg>
+                QR
             </a>
             <a href="{{ route('portal.profil') }}" class="py-2.5 {{ request()->routeIs('portal.profil') ? 'text-gold-400' : 'text-cream-100/70' }}">
                 <svg class="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM4 20a8 4 0 0116 0"/></svg>

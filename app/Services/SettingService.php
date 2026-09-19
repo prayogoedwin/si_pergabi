@@ -29,6 +29,7 @@ class SettingService
     private const ENCRYPTED = [
         'whatsapp.fonnte_token',
         'mail.password',
+        'google.client_secret',
     ];
 
     /**
@@ -447,6 +448,32 @@ class SettingService
         }
     }
 
+    public function applyGoogleConfig(): void
+    {
+        $stored = $this->all();
+
+        if (array_key_exists('google.client_id', $stored)) {
+            Config::set('services.google.client_id', $this->get('google.client_id'));
+        }
+
+        if (array_key_exists('google.client_secret', $stored)) {
+            Config::set('services.google.client_secret', $this->get('google.client_secret'));
+        }
+
+        $redirect = $this->get('google.redirect_uri');
+        if (filled($redirect)) {
+            Config::set('services.google.redirect', $redirect);
+        }
+    }
+
+    public function googleLoginEnabled(): bool
+    {
+        $this->applyGoogleConfig();
+
+        return filled(config('services.google.client_id'))
+            && filled(config('services.google.client_secret'));
+    }
+
     /**
      * @return array<string, string|null>
      */
@@ -456,7 +483,15 @@ class SettingService
             'pendaftaran_tipe' => $this->tipe(),
             'email_aktif' => $this->emailAktif(),
             'whatsapp_aktif' => $this->whatsappAktif(),
-            'fonnte_token_tersimpan' => filled($this->fonnteToken()),
+        ];
+    }
+
+    /**
+     * @return array<string, string|null>
+     */
+    public function integrasiFormValues(): array
+    {
+        return [
             'mail_mailer' => $this->get('mail.mailer', (string) config('mail.default')),
             'mail_host' => $this->get('mail.host', (string) config('mail.mailers.smtp.host')),
             'mail_port' => $this->get('mail.port', (string) config('mail.mailers.smtp.port')),
@@ -465,6 +500,10 @@ class SettingService
             'mail_scheme' => $this->get('mail.scheme', (string) config('mail.mailers.smtp.scheme')),
             'mail_from_address' => $this->get('mail.from_address', (string) config('mail.from.address')),
             'mail_from_name' => $this->get('mail.from_name', (string) config('mail.from.name')),
+            'google_client_id' => $this->get('google.client_id', (string) config('services.google.client_id')),
+            'google_client_secret_tersimpan' => filled($this->get('google.client_secret')) || filled(config('services.google.client_secret')),
+            'google_redirect_uri' => $this->get('google.redirect_uri', (string) config('services.google.redirect')),
+            'fonnte_token_tersimpan' => filled($this->fonnteToken()),
         ];
     }
 

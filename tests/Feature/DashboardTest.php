@@ -250,7 +250,23 @@ class DashboardTest extends TestCase
             ->assertSee('Cetak A4 / PDF')
             ->assertSee('Unduh PNG')
             ->assertSee('kta-demo-front', false)
+            ->assertSee($aktif->nomor_anggota)
+            ->assertSee('verifikasi-qr-anggota', false)
+            ->assertSee('kode=', false)
+            ->assertSee('data-kta-qr', false)
+            ->assertSee('js/pergabi-qr.js', false);
+
+        $this->actingAs($this->adminPp())
+            ->get(route('anggota.qr', $aktif))
+            ->assertOk()
+            ->assertSee('QR Code')
+            ->assertSee('data-anggota-qr', false)
             ->assertSee($aktif->nomor_anggota);
+
+        $this->actingAs($this->adminPp())
+            ->get(route('anggota.qr', $pending))
+            ->assertOk()
+            ->assertSee('QR Code belum tersedia');
     }
 
     private function assertDashboardTotal(string $html, int $expected): void

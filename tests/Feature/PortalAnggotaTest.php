@@ -78,6 +78,13 @@ class PortalAnggotaTest extends TestCase
             ->assertOk()
             ->assertSee('Belum dapat ditampilkan')
             ->assertDontSee('Cetak ID Card');
+
+        $this->actingAs($user)
+            ->get(route('portal.qr'))
+            ->assertOk()
+            ->assertSee('QR Code anggota')
+            ->assertSee('Belum dapat ditampilkan')
+            ->assertDontSee('data-anggota-qr', false);
     }
 
     public function test_full_kta_is_available_after_pp_approval(): void
@@ -95,13 +102,36 @@ class PortalAnggotaTest extends TestCase
             ->assertSee('kta-demo-back', false)
             ->assertSee($anggota->namaLengkap())
             ->assertSee($anggota->nomor_anggota)
-            ->assertSee($anggota->nik);
+            ->assertSee($anggota->nik)
+            ->assertSee($anggota->ttlLabel())
+            ->assertSee($anggota->instansiLabel())
+            ->assertSee($anggota->alamatLabel())
+            ->assertSee($anggota->labelPdPergabi())
+            ->assertSee($anggota->masaBerlakuLabel())
+            ->assertSee('verifikasi-qr-anggota', false)
+            ->assertSee('kode=', false)
+            ->assertSee('data-kta-qr', false)
+            ->assertSee('js/pergabi-qr.js', false);
 
-        $this->get(route('kta.verifikasi', $anggota->nomor_anggota))
+        $this->actingAs($user)
+            ->get(route('portal.qr'))
             ->assertOk()
+            ->assertSee('data-anggota-qr', false)
+            ->assertSee('/verifikasi-qr-anggota/?kode=', false)
+            ->assertSee($anggota->nomor_anggota);
+
+        $this->get($anggota->urlVerifikasiQr())
+            ->assertOk()
+            ->assertSee('Kartu ini valid')
             ->assertSee($anggota->namaLengkap())
             ->assertSee('Aktif')
-            ->assertSee($anggota->nomor_anggota);
+            ->assertSee($anggota->nomor_anggota)
+            ->assertSee($anggota->nik)
+            ->assertSee($anggota->ttlLabel())
+            ->assertSee($anggota->instansiLabel())
+            ->assertSee($anggota->alamatLabel())
+            ->assertSee($anggota->labelPdPergabi())
+            ->assertSee('NB:');
     }
 
     public function test_public_verification_shows_inactive_status(): void
@@ -109,8 +139,9 @@ class PortalAnggotaTest extends TestCase
         $user = $this->makeMember(Anggota::STATUS_AKTIF);
         $user->anggota->update(['status' => Anggota::STATUS_TIDAK_AKTIF]);
 
-        $this->get(route('kta.verifikasi', $user->anggota->nomor_anggota))
+        $this->get($user->anggota->urlVerifikasiQr())
             ->assertOk()
+            ->assertSee('Kartu tidak valid')
             ->assertSee('Tidak aktif');
     }
 

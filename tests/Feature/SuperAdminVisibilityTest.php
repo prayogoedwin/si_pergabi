@@ -32,8 +32,10 @@ class SuperAdminVisibilityTest extends TestCase
             ->assertSee(route('cache.index'))
             ->assertSee(route('settings.organisasi.edit'))
             ->assertSee(route('settings.pendaftaran.edit'))
+            ->assertSee(route('settings.integrasi.edit'))
             ->assertSee('Identitas Organisasi')
-            ->assertSee('Pengaturan Pendaftaran');
+            ->assertSee('Pengaturan Pendaftaran')
+            ->assertSee('Integrasi');
     }
 
     public function test_super_admin_sees_roles_menu(): void
@@ -45,6 +47,7 @@ class SuperAdminVisibilityTest extends TestCase
             ->assertSee('Setting')
             ->assertSee('Identitas Organisasi')
             ->assertSee('Pengaturan Pendaftaran')
+            ->assertSee('Integrasi')
             ->assertSee('Cache');
     }
 

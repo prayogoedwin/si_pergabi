@@ -16,7 +16,19 @@ class SettingPermissionSeeder extends Seeder
         'edit-organisasi',
         'view-pendaftaran',
         'edit-pendaftaran',
+        'view-integrasi',
+        'edit-integrasi',
         'view-cache',
+    ];
+
+    /**
+     * Menu Setting hanya Super Admin dan Admin PP (admin nasional).
+     *
+     * @var list<string>
+     */
+    public const ROLE_SLUGS = [
+        Role::SUPER_ADMIN,
+        Role::ADMIN_PP,
     ];
 
     public function run(): void
@@ -27,7 +39,14 @@ class SettingPermissionSeeder extends Seeder
 
         $ids = Permission::query()->whereIn('name', self::NAMES)->pluck('id');
 
-        Role::query()->where('slug', Role::ADMIN_PP)->first()?->permissions()->syncWithoutDetaching($ids);
-        Role::query()->where('slug', Role::SUPER_ADMIN)->first()?->permissions()->syncWithoutDetaching($ids);
+        Role::query()
+            ->whereIn('slug', self::ROLE_SLUGS)
+            ->get()
+            ->each(fn (Role $role) => $role->permissions()->syncWithoutDetaching($ids));
+
+        Role::query()
+            ->whereNotIn('slug', self::ROLE_SLUGS)
+            ->get()
+            ->each(fn (Role $role) => $role->permissions()->detach($ids));
     }
 }

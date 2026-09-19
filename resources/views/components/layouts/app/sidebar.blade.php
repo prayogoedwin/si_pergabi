@@ -22,9 +22,9 @@
                             </x-layouts.sidebar-two-level-link-parent>
                             @endif
 
-                            @if(auth()->user()->hasPermission('view-organisasi') || auth()->user()->hasPermission('view-pendaftaran') || auth()->user()->hasPermission('view-cache'))
+                            @if(auth()->user()->hasPermission('view-organisasi') || auth()->user()->hasPermission('view-pendaftaran') || auth()->user()->hasPermission('view-integrasi') || auth()->user()->hasPermission('view-cache'))
                             <x-layouts.sidebar-two-level-link-parent title="Setting" icon="fas-gear"
-                                :active="request()->routeIs('settings.organisasi*') || request()->routeIs('settings.pendaftaran*') || request()->routeIs('cache*')">
+                                :active="request()->routeIs('settings.organisasi*') || request()->routeIs('settings.pendaftaran*') || request()->routeIs('settings.integrasi*') || request()->routeIs('cache*')">
                                 @if(auth()->user()->hasPermission('view-organisasi'))
                                 <x-layouts.sidebar-two-level-link href="{{ route('settings.organisasi.edit') }}" icon='fas-id-card'
                                     :active="request()->routeIs('settings.organisasi*')">Identitas Organisasi</x-layouts.sidebar-two-level-link>
@@ -32,6 +32,10 @@
                                 @if(auth()->user()->hasPermission('view-pendaftaran'))
                                 <x-layouts.sidebar-two-level-link href="{{ route('settings.pendaftaran.edit') }}" icon='fas-sliders'
                                     :active="request()->routeIs('settings.pendaftaran*')">Pengaturan Pendaftaran</x-layouts.sidebar-two-level-link>
+                                @endif
+                                @if(auth()->user()->hasPermission('view-integrasi'))
+                                <x-layouts.sidebar-two-level-link href="{{ route('settings.integrasi.edit') }}" icon='fas-envelope'
+                                    :active="request()->routeIs('settings.integrasi*')">Integrasi</x-layouts.sidebar-two-level-link>
                                 @endif
                                 @if(auth()->user()->hasPermission('view-cache'))
                                 <x-layouts.sidebar-two-level-link href="{{ route('cache.index') }}" icon='fas-server'
@@ -61,6 +65,11 @@
                             @if(auth()->user()->hasPermission('view-anggota'))
                             <x-layouts.sidebar-link href="{{ route('anggota.index') }}" icon='fas-id-badge'
                                 :active="request()->routeIs('anggota*')">Anggota</x-layouts.sidebar-link>
+                            @endif
+
+                            @if(auth()->user()->hasPermission('view-laporan'))
+                            <x-layouts.sidebar-link href="{{ route('laporan.index') }}" icon='fas-file-excel'
+                                :active="request()->routeIs('laporan*')">Laporan</x-layouts.sidebar-link>
                             @endif
                         </ul>
                     </nav>

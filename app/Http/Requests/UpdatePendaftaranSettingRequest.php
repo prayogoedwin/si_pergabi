@@ -23,15 +23,6 @@ class UpdatePendaftaranSettingRequest extends FormRequest
             'pendaftaran_tipe' => ['required', Rule::in([SettingService::TIPE_LANGSUNG, SettingService::TIPE_VERIFIKASI])],
             'email_aktif' => ['nullable', 'boolean'],
             'whatsapp_aktif' => ['nullable', 'boolean'],
-            'fonnte_token' => ['nullable', 'string', 'max:255'],
-            'mail_mailer' => ['required', Rule::in(['smtp', 'log', 'sendmail'])],
-            'mail_host' => ['nullable', 'string', 'max:255'],
-            'mail_port' => ['nullable', 'integer', 'min:1', 'max:65535'],
-            'mail_username' => ['nullable', 'string', 'max:255'],
-            'mail_password' => ['nullable', 'string', 'max:255'],
-            'mail_scheme' => ['nullable', 'in:tls,smtps'],
-            'mail_from_address' => ['nullable', 'email', 'max:255'],
-            'mail_from_name' => ['nullable', 'string', 'max:255'],
         ];
     }
 
@@ -49,12 +40,8 @@ class UpdatePendaftaranSettingRequest extends FormRequest
                 $validator->errors()->add('email_aktif', 'Aktifkan email atau WhatsApp. Minimal satu kanal verifikasi.');
             }
 
-            if ($whatsapp && blank($this->input('fonnte_token')) && ! app(SettingService::class)->fonnteToken()) {
-                $validator->errors()->add('fonnte_token', 'Token Fonnte wajib diisi jika WhatsApp aktif.');
-            }
-
-            if ($email && blank($this->input('mail_from_address'))) {
-                $validator->errors()->add('mail_from_address', 'Alamat pengirim email wajib diisi jika verifikasi email aktif.');
+            if ($whatsapp && ! app(SettingService::class)->fonnteToken()) {
+                $validator->errors()->add('whatsapp_aktif', 'Atur token Fonnte di menu Integrasi sebelum mengaktifkan WhatsApp.');
             }
         });
     }
@@ -68,8 +55,6 @@ class UpdatePendaftaranSettingRequest extends FormRequest
             'pendaftaran_tipe' => 'tipe pendaftaran',
             'email_aktif' => 'verifikasi email',
             'whatsapp_aktif' => 'verifikasi WhatsApp',
-            'fonnte_token' => 'token Fonnte',
-            'mail_from_address' => 'email pengirim',
         ];
     }
 }

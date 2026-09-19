@@ -23,6 +23,8 @@
                 </div>
                 <p class="kta-nama">demo</p>
                 <p class="kta-nomor">demo</p>
+                <p class="kta-pd">PD PERGABI demo</p>
+                <p class="kta-berlaku">Berlaku s.d. demo</p>
                 <div class="kta-foto">
                     <span class="kta-foto-label">DEMO</span>
                 </div>

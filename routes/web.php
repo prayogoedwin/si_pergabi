@@ -5,6 +5,7 @@ use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CacheController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KtaVerifikasiController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PortalController;
@@ -12,6 +13,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\Settings;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WilayahController;
+use App\Models\Anggota;
 use App\Models\Role;
 use Illuminate\Support\Facades\Route;
 
@@ -28,12 +30,20 @@ Route::middleware('guest')->group(function () {
     Route::post('register', [PendaftaranController::class, 'store'])->middleware('throttle:8,1');
 });
 
-Route::get('verifikasi/{nomor}', [KtaVerifikasiController::class, 'show'])
-    ->name('kta.verifikasi')
-    ->where('nomor', '[0-9.]+');
-Route::get('verifikasi/{nomor}/foto', [KtaVerifikasiController::class, 'foto'])
-    ->name('kta.foto')
-    ->where('nomor', '[0-9.]+');
+Route::get('verifikasi-qr-anggota', [KtaVerifikasiController::class, 'show'])->name('kta.verifikasi');
+Route::get('verifikasi-qr-anggota/foto', [KtaVerifikasiController::class, 'foto'])->name('kta.foto');
+Route::get('verifikasi_qr-anggota', function () {
+    return redirect()->route('kta.verifikasi', request()->query());
+});
+Route::get('verifikasi_qr-anggota/foto', function () {
+    return redirect()->route('kta.foto', request()->query());
+});
+Route::get('verifikasi/{nomor}', function (string $nomor) {
+    return redirect(Anggota::urlVerifikasiQrFor($nomor));
+})->where('nomor', '[0-9.]+');
+Route::get('verifikasi/{nomor}/foto', function (string $nomor) {
+    return redirect(Anggota::urlFotoVerifikasiQrFor($nomor));
+})->where('nomor', '[0-9.]+');
 
 Route::get('dashboard', DashboardController::class)
     ->middleware(['auth', 'verified'])
@@ -50,6 +60,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('settings/pendaftaran', [Settings\PendaftaranSettingController::class, 'edit'])->name('settings.pendaftaran.edit')->middleware('permission:view-pendaftaran');
     Route::put('settings/pendaftaran', [Settings\PendaftaranSettingController::class, 'update'])->name('settings.pendaftaran.update')->middleware('permission:edit-pendaftaran');
+    Route::get('settings/integrasi', [Settings\IntegrasiSettingController::class, 'edit'])->name('settings.integrasi.edit')->middleware('permission:view-integrasi');
+    Route::put('settings/integrasi', [Settings\IntegrasiSettingController::class, 'update'])->name('settings.integrasi.update')->middleware('permission:edit-integrasi');
     Route::get('settings/organisasi', [Settings\OrganisasiSettingController::class, 'edit'])->name('settings.organisasi.edit')->middleware('permission:view-organisasi');
     Route::put('settings/organisasi', [Settings\OrganisasiSettingController::class, 'update'])->name('settings.organisasi.update')->middleware('permission:edit-organisasi');
     Route::get('cache', [CacheController::class, 'index'])->name('cache.index')->middleware('permission:view-cache');
@@ -110,6 +122,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['verified'])->group(function () {
         Route::get('portal', [PortalController::class, 'show'])->name('portal.show');
         Route::get('portal/kta', [PortalController::class, 'kta'])->name('portal.kta');
+        Route::get('portal/qr', [PortalController::class, 'qr'])->name('portal.qr');
         Route::get('portal/profil', [PortalController::class, 'profil'])->name('portal.profil');
         Route::put('portal/password', [PortalController::class, 'updatePassword'])->name('portal.password');
         Route::post('portal/foto', [PortalController::class, 'updateFoto'])->name('portal.foto.update');
@@ -117,8 +130,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('keanggotaan', fn () => redirect()->route('portal.show'))->name('keanggotaan.show');
     });
 
+    Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index')->middleware('permission:view-laporan');
+    Route::get('laporan/export', [LaporanController::class, 'export'])->name('laporan.export')->middleware('permission:download-laporan');
+
     Route::get('anggota', [AnggotaController::class, 'index'])->name('anggota.index')->middleware('permission:view-anggota');
     Route::get('anggota/{anggota}', [AnggotaController::class, 'show'])->name('anggota.show')->middleware('permission:show-anggota');
+    Route::get('anggota/{anggota}/qr', [AnggotaController::class, 'qr'])->name('anggota.qr')->middleware('permission:show-anggota');
     Route::post('anggota/{anggota}/reset-password', [AnggotaController::class, 'resetPassword'])->name('anggota.reset-password')->middleware('permission:show-anggota');
     Route::get('anggota/{anggota}/dokumen/{dokumen}', [AnggotaController::class, 'dokumen'])->name('anggota.dokumen');
     Route::post('anggota/{anggota}/verifikasi-pc', [AnggotaController::class, 'verifyPc'])->name('anggota.verify-pc')->middleware('permission:verify-anggota-pc');
