@@ -22,4 +22,10 @@ return [
         'halaman_depan' => 'assets/kta/halaman-depan.png',
         'halaman_belakang' => 'assets/kta/halaman-belakang.png',
     ],
+    'wp' => [
+        'base_url' => env('PERGABI_WP_API_URL', 'https://pergabi.id/wp-json/wp/v2'),
+        'kegiatan_category' => (int) env('PERGABI_WP_KEGIATAN_CATEGORY', 11),
+        'per_page' => (int) env('PERGABI_WP_PER_PAGE', 12),
+        'cache_ttl' => (int) env('PERGABI_WP_CACHE_TTL', 600),
+    ],
 ];

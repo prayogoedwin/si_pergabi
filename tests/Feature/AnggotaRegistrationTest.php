@@ -280,6 +280,36 @@ class AnggotaRegistrationTest extends TestCase
             ->assertSee('"pilihKanal":true', false);
     }
 
+    public function test_admin_opens_dokumen_preview_instead_of_direct_download(): void
+    {
+        Notification::fake();
+        $this->postJson(route('daftar.store'), $this->payload())->assertCreated();
+        $this->post(route('logout'));
+
+        $anggota = User::query()->where('email', 'guru@example.com')->firstOrFail()->anggota;
+        $dokumen = $anggota->dokumen()->where('jenis', 'ktp')->firstOrFail();
+
+        $this->actingAs($this->adminPp())
+            ->get(route('anggota.show', $anggota))
+            ->assertOk()
+            ->assertSee('KTP')
+            ->assertSee('Pratinjau dokumen')
+            ->assertSee('Tutup')
+            ->assertSee('Download');
+
+        $preview = $this->actingAs($this->adminPp())
+            ->get(route('anggota.dokumen', [$anggota, $dokumen]));
+
+        $preview->assertOk();
+        $this->assertStringContainsString('inline', strtolower((string) $preview->headers->get('content-disposition')));
+
+        $download = $this->actingAs($this->adminPp())
+            ->get(route('anggota.dokumen', [$anggota, $dokumen, 'download' => 1]));
+
+        $download->assertOk();
+        $this->assertStringContainsString('attachment', strtolower((string) $download->headers->get('content-disposition')));
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>

@@ -55,6 +55,8 @@
             <div class="{{ $wide ? 'max-w-5xl' : 'max-w-3xl' }} mx-auto px-4 flex gap-1">
                 <a href="{{ route('portal.show') }}"
                     class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.show') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">Beranda</a>
+                <a href="{{ route('portal.kegiatan') }}"
+                    class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.kegiatan*') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">Kegiatan</a>
                 <a href="{{ route('portal.kta') }}"
                     class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.kta') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">Kartu digital</a>
                 <a href="{{ route('portal.qr') }}"
@@ -76,10 +78,14 @@
     </main>
 
     <nav class="portal-chrome md:hidden fixed bottom-0 inset-x-0 z-30 bg-navy-900 border-t border-gold-400/25 pb-[env(safe-area-inset-bottom)]">
-        <div class="grid grid-cols-4 text-center text-[11px]">
+        <div class="grid grid-cols-5 text-center text-[11px]">
             <a href="{{ route('portal.show') }}" class="py-2.5 {{ request()->routeIs('portal.show') ? 'text-gold-400' : 'text-cream-100/70' }}">
                 <svg class="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10.5 12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1v-9.5z"/></svg>
                 Beranda
+            </a>
+            <a href="{{ route('portal.kegiatan') }}" class="py-2.5 {{ request()->routeIs('portal.kegiatan*') ? 'text-gold-400' : 'text-cream-100/70' }}">
+                <svg class="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 7V3m8 4V3M5 11h14M6 5h12a1 1 0 011 1v13a1 1 0 01-1 1H6a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>
+                Kegiatan
             </a>
             <a href="{{ route('portal.kta') }}" class="py-2.5 {{ request()->routeIs('portal.kta') ? 'text-gold-400' : 'text-cream-100/70' }}">
                 <svg class="mx-auto h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6a2 2 0 012-2h12a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M8 10h.01M8 14h8"/></svg>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Anggota;
 use App\Models\AnggotaDokumen;
 use App\Services\SettingService;
+use App\Services\WebsitePostService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -87,6 +88,44 @@ class PortalController extends Controller
         return view('portal.profil', [
             'anggota' => $anggota,
             'user' => $request->user(),
+        ]);
+    }
+
+    public function kegiatan(Request $request, WebsitePostService $websitePosts): View|RedirectResponse
+    {
+        $redirect = $this->redirectPengurus($request);
+
+        if ($redirect) {
+            return $redirect;
+        }
+
+        $result = $websitePosts->paginate(
+            max(1, (int) $request->integer('page', 1)),
+            $request->url(),
+        );
+
+        return view('portal.kegiatan', [
+            'posts' => $result['posts'],
+            'failed' => $result['failed'],
+            'showRoute' => 'portal.kegiatan.show',
+        ]);
+    }
+
+    public function kegiatanShow(Request $request, int $post, WebsitePostService $websitePosts): View|RedirectResponse
+    {
+        $redirect = $this->redirectPengurus($request);
+
+        if ($redirect) {
+            return $redirect;
+        }
+
+        $kegiatan = $websitePosts->find($post);
+
+        abort_if($kegiatan === null, 404);
+
+        return view('portal.kegiatan-show', [
+            'post' => $kegiatan,
+            'indexRoute' => 'portal.kegiatan',
         ]);
     }
 

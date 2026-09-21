@@ -4,6 +4,7 @@ use App\Http\Controllers\AnggotaController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CacheController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\KtaVerifikasiController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\PendaftaranController;
@@ -122,6 +123,8 @@ Route::middleware(['auth'])->group(function () {
 
     Route::middleware(['verified'])->group(function () {
         Route::get('portal', [PortalController::class, 'show'])->name('portal.show');
+        Route::get('portal/kegiatan', [PortalController::class, 'kegiatan'])->name('portal.kegiatan');
+        Route::get('portal/kegiatan/{post}', [PortalController::class, 'kegiatanShow'])->name('portal.kegiatan.show')->whereNumber('post');
         Route::get('portal/kta', [PortalController::class, 'kta'])->name('portal.kta');
         Route::get('portal/qr', [PortalController::class, 'qr'])->name('portal.qr');
         Route::get('portal/profil', [PortalController::class, 'profil'])->name('portal.profil');
@@ -130,6 +133,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('portal/foto', [PortalController::class, 'foto'])->name('portal.foto');
         Route::get('keanggotaan', fn () => redirect()->route('portal.show'))->name('keanggotaan.show');
     });
+
+    Route::get('kegiatan', [KegiatanController::class, 'index'])->middleware('verified')->name('kegiatan.index');
+    Route::get('kegiatan/{post}', [KegiatanController::class, 'show'])->middleware('verified')->name('kegiatan.show')->whereNumber('post');
 
     Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index')->middleware('permission:view-laporan');
     Route::get('laporan/export', [LaporanController::class, 'export'])->name('laporan.export')->middleware('permission:download-laporan');

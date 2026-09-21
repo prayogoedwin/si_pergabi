@@ -155,7 +155,19 @@ class AnggotaController extends Controller
         abort_unless($dokumen->anggota_id === $anggota->id, 404);
         abort_unless(Storage::disk('local')->exists($dokumen->path), 404);
 
-        return Storage::disk('local')->download($dokumen->path, $dokumen->nama_asli);
+        $filename = $dokumen->nama_asli ?: basename($dokumen->path);
+        $headers = [];
+
+        if (filled($dokumen->mime)) {
+            $headers['Content-Type'] = $dokumen->mime;
+        }
+
+        return Storage::disk('local')->response(
+            $dokumen->path,
+            $filename,
+            $headers,
+            $request->boolean('download') ? 'attachment' : 'inline',
+        );
     }
 
     private function handleTransition(callable $callback, string $message): RedirectResponse

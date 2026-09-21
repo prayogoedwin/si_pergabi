@@ -8,6 +8,9 @@
                             <x-layouts.sidebar-link href="{{ route('dashboard') }}" icon='fas-house'
                                 :active="request()->routeIs('dashboard*')">Dashboard</x-layouts.sidebar-link>
 
+                            <x-layouts.sidebar-link href="{{ route('kegiatan.index') }}" icon='fas-calendar'
+                                :active="request()->routeIs('kegiatan*')">Kegiatan</x-layouts.sidebar-link>
+
                             @if(auth()->user()->hasPermission('view-wilayah') || auth()->user()->hasPermission('view-area'))
                             <x-layouts.sidebar-two-level-link-parent title="Master" icon="fas-database"
                                 :active="request()->routeIs('wilayah*') || request()->routeIs('area*')">

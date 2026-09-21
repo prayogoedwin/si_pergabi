@@ -35,5 +35,6 @@
         <env name="NIGHTWATCH_ENABLED" value="false"/>
         <env name="GOOGLE_CLIENT_ID" value=""/>
         <env name="GOOGLE_CLIENT_SECRET" value=""/>
+        <env name="PERGABI_WP_CACHE_TTL" value="0"/>
     </php>
 </phpunit>

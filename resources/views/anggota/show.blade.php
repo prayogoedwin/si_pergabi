@@ -37,17 +37,62 @@
             <p>{{ $anggota->kelurahan?->nama }}, {{ $anggota->kecamatan?->nama }}, {{ $anggota->kabupaten?->nama }}, {{ $anggota->provinsi?->nama }} {{ $anggota->kode_pos }}</p>
             <p class="pt-2"><span class="text-gray-500">Profesi</span> · {{ $anggota->status_guru }} · {{ $anggota->jenjang }} · {{ $anggota->nama_sekolah }}</p>
         </div>
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+        <div
+            class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6"
+            x-data="{
+                open: false,
+                title: '',
+                previewUrl: '',
+                downloadUrl: '',
+                show(title, previewUrl, downloadUrl) {
+                    this.title = title;
+                    this.previewUrl = previewUrl;
+                    this.downloadUrl = downloadUrl;
+                    this.open = true;
+                },
+                close() {
+                    this.open = false;
+                    this.previewUrl = '';
+                }
+            }"
+            @keydown.escape.window="close()"
+        >
+            <style>[x-cloak]{display:none!important}</style>
             <p class="text-sm font-semibold mb-3">Dokumen</p>
             <ul class="space-y-2 text-sm">
-                @foreach ($anggota->dokumen as $dokumen)
+                @forelse ($anggota->dokumen as $dokumen)
                     <li>
-                        <a href="{{ route('anggota.dokumen', [$anggota, $dokumen]) }}" class="text-blue-600 dark:text-blue-400 hover:underline">
+                        <button type="button"
+                            class="text-blue-600 dark:text-blue-400 hover:underline text-left"
+                            @click="show(
+                                @js($dokumen->jenisLabel()),
+                                @js(route('anggota.dokumen', [$anggota, $dokumen])),
+                                @js(route('anggota.dokumen', [$anggota, $dokumen, 'download' => 1]))
+                            )">
                             {{ $dokumen->jenisLabel() }}
-                        </a>
+                        </button>
                     </li>
-                @endforeach
+                @empty
+                    <li class="text-navy-800/50 dark:text-cream-100/50">Belum ada dokumen.</li>
+                @endforelse
             </ul>
+
+            <div x-show="open" x-cloak
+                class="fixed inset-0 z-50 flex items-center justify-center p-4"
+                style="display: none;">
+                <div class="absolute inset-0 bg-navy-950/70" @click="close()"></div>
+                <div class="relative z-10 flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-navy-900">
+                    <div class="flex items-center justify-between gap-3 border-b border-[#e4ddd3] px-4 py-3 dark:border-gold-400/25">
+                        <h2 class="min-w-0 truncate font-semibold text-navy-900 dark:text-cream-100" x-text="title">Dokumen</h2>
+                        <button type="button" class="text-sm text-navy-800/70 hover:text-navy-900 dark:text-gold-400" @click="close()">Tutup</button>
+                    </div>
+                    <iframe :src="previewUrl" class="h-[70vh] w-full bg-[#f7f3ee]" title="Pratinjau dokumen"></iframe>
+                    <div class="flex flex-wrap items-center justify-end gap-2 border-t border-[#e4ddd3] px-4 py-3 dark:border-gold-400/25">
+                        <button type="button" class="rounded-lg bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700" @click="close()">Tutup</button>
+                        <a :href="downloadUrl" class="rounded-lg bg-saffron-600 px-4 py-2 text-sm font-medium text-white hover:bg-saffron-700">Download</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
