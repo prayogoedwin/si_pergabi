@@ -1,8 +1,12 @@
 window.PergabiPendaftaran = function (config) {
-    const STORAGE_KEY = 'pergabi.pendaftaran.v1';
+    const renewal = Boolean(config.renewal);
+    const lastStep = renewal ? 4 : 5;
+    const STORAGE_KEY = renewal ? 'pergabi.perpanjangan.v1' : 'pergabi.pendaftaran.v1';
 
     return {
         step: 1,
+        lastStep,
+        renewal,
         saving: false,
         submitting: false,
         savedAt: null,
@@ -30,8 +34,6 @@ window.PergabiPendaftaran = function (config) {
             status_guru: '',
             nip: '',
             nuptk: '',
-            nomor_gtk: '',
-            mapel: '',
             jenjang: '',
             nama_sekolah: '',
             npsn: '',
@@ -43,10 +45,7 @@ window.PergabiPendaftaran = function (config) {
         },
         files: {
             pas_foto: null,
-            ktp: null,
             sk_mengajar: null,
-            ijazah: null,
-            sertifikat_pendidik: null,
         },
         options: {
             provinsi: [],
@@ -58,7 +57,10 @@ window.PergabiPendaftaran = function (config) {
 
         async init() {
             this.restore();
-            if (config.email) {
+            if (config.prefill && !this.savedAt) {
+                Object.assign(this.form, config.prefill);
+            }
+            if (config.email && !renewal) {
                 this.form.email = config.email;
             }
             if (!this.form.kanal_verifikasi) {
@@ -123,7 +125,7 @@ window.PergabiPendaftaran = function (config) {
         },
 
         nipRequired() {
-            return this.form.status_guru === 'ASN' || this.form.status_guru === 'PPPK';
+            return this.form.status_guru === 'ASN';
         },
 
         async onProvinsiChange() {
@@ -280,7 +282,7 @@ window.PergabiPendaftaran = function (config) {
                 2: ['hp', 'whatsapp', 'email', 'alamat', 'provinsi_kode', 'kabupaten_kode', 'kecamatan_kode', 'kelurahan_kode', 'kode_pos'],
                 3: ['status_guru', 'jenjang', 'nama_sekolah', 'status_sekolah', 'alamat_sekolah'],
                 4: [],
-                5: ['password', 'password_confirmation'],
+                5: renewal ? [] : ['password', 'password_confirmation'],
             }[this.step];
 
             required.forEach((name) => {
@@ -300,18 +302,18 @@ window.PergabiPendaftaran = function (config) {
             }
 
             if (this.step === 3 && this.nipRequired() && !this.form.nip) {
-                this.errors.nip = 'NIP wajib untuk ASN/PPPK.';
+                this.errors.nip = 'NIP wajib untuk ASN.';
             }
 
             if (this.step === 4) {
-                ['pas_foto', 'ktp', 'sk_mengajar', 'ijazah'].forEach((jenis) => {
+                ['pas_foto', 'sk_mengajar'].forEach((jenis) => {
                     if (!this.files[jenis]) {
                         this.errors[jenis] = 'Berkas wajib diunggah.';
                     }
                 });
             }
 
-            if (this.step === 5) {
+            if (this.step === 5 && !renewal) {
                 if (this.form.password.length < 8) {
                     this.errors.password = 'Kata sandi minimal 8 karakter.';
                 }
@@ -330,7 +332,7 @@ window.PergabiPendaftaran = function (config) {
             if (!this.validateStep()) {
                 return;
             }
-            this.step = Math.min(5, this.step + 1);
+            this.step = Math.min(lastStep, this.step + 1);
             this.persist();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         },
@@ -357,7 +359,7 @@ window.PergabiPendaftaran = function (config) {
                 1: ['nik', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'status_perkawinan'],
                 2: ['hp', 'whatsapp', 'email', 'alamat', 'provinsi_kode', 'kabupaten_kode', 'kecamatan_kode', 'kelurahan_kode', 'kode_pos'],
                 3: ['status_guru', 'nip', 'jenjang', 'nama_sekolah', 'status_sekolah', 'alamat_sekolah'],
-                4: ['pas_foto', 'ktp', 'sk_mengajar', 'ijazah', 'sertifikat_pendidik'],
+                4: ['pas_foto', 'sk_mengajar'],
                 5: ['password', 'password_confirmation', 'kanal_verifikasi'],
             };
 
@@ -373,7 +375,7 @@ window.PergabiPendaftaran = function (config) {
             this.errorMessage = '';
             this.errors = {};
 
-            if (this.verifikasi.langsung) {
+            if (this.verifikasi.langsung || renewal) {
                 this.form.kanal_verifikasi = '';
             } else if (!this.verifikasi.pilihKanal) {
                 this.form.kanal_verifikasi = this.verifikasi.defaultKanal || '';
@@ -427,7 +429,7 @@ window.PergabiPendaftaran = function (config) {
         },
 
         jumpToFirstError() {
-            for (let step = 1; step <= 5; step += 1) {
+            for (let step = 1; step <= lastStep; step += 1) {
                 if (this.stepHasError(step)) {
                     this.step = step;
                     break;

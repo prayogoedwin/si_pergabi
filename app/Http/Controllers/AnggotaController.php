@@ -9,19 +9,25 @@ use App\Models\AnggotaDokumen;
 use App\Models\Wilayah;
 use App\Services\AnggotaStatusService;
 use App\Services\SettingService;
+use App\Services\WhatsAppOtpService;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AnggotaController extends Controller
 {
+    public function __construct(private readonly AnggotaStatusService $status) {}
+
     public function index(Request $request): View
     {
         abort_unless($request->user()?->hasPermission('view-anggota') || $request->user()?->isSuperAdmin(), 403);
+
+        $this->status->expireOverdueLazily();
 
         $user = $request->user();
         $level = $user->organisasiLevel();
@@ -70,8 +76,11 @@ class AnggotaController extends Controller
         abort_unless($request->user()?->hasPermission('show-anggota') || $request->user()?->isSuperAdmin(), 403);
         abort_unless($request->user()->canAccessAnggota($anggota), 403);
 
+        $this->status->expireIfOverdue($anggota);
+        $anggota->refresh();
         $anggota->load(['user', 'dokumen', 'statusLogs.user', 'provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 'pd', 'pc']);
 
+        $hasKartu = filled($anggota->nomor_anggota);
         $unlocked = $anggota->canAccessKartuDigital();
 
         return view('anggota.show', [
@@ -79,10 +88,12 @@ class AnggotaController extends Controller
             'canVerifyPc' => $this->canAct($request, 'verify-anggota-pc') && $anggota->status === Anggota::STATUS_MENUNGGU_VERIFIKASI_PC,
             'canValidatePd' => $this->canAct($request, 'validate-anggota-pd') && $anggota->status === Anggota::STATUS_MENUNGGU_VALIDASI_PD,
             'canApprovePp' => $this->canAct($request, 'approve-anggota-pp') && $anggota->status === Anggota::STATUS_MENUNGGU_PERSETUJUAN_PP,
+            'canToggleStatus' => $this->canAct($request, 'toggle-anggota-status') && in_array($anggota->status, [Anggota::STATUS_AKTIF, Anggota::STATUS_TIDAK_AKTIF], true),
+            'hasKartu' => $hasKartu,
             'unlocked' => $unlocked,
-            'verifikasiUrl' => $unlocked ? $anggota->urlVerifikasiQr() : null,
+            'verifikasiUrl' => $hasKartu ? $anggota->urlVerifikasiQr() : null,
             'identitas' => app(SettingService::class)->identitas(),
-            'fotoUrl' => $unlocked ? $anggota->urlFotoVerifikasiQr() : null,
+            'fotoUrl' => $hasKartu ? $anggota->urlFotoVerifikasiQr() : null,
         ]);
     }
 
@@ -90,6 +101,9 @@ class AnggotaController extends Controller
     {
         abort_unless($request->user()?->hasPermission('show-anggota') || $request->user()?->isSuperAdmin(), 403);
         abort_unless($request->user()->canAccessAnggota($anggota), 403);
+
+        $this->status->expireIfOverdue($anggota);
+        $anggota->refresh();
 
         $unlocked = $anggota->canAccessQrCode();
 
@@ -114,6 +128,39 @@ class AnggotaController extends Controller
             'status' => 'Password akun anggota berhasil direset. Salin password baru ini dan berikan kepada anggota, lalu minta mereka mengganti sendiri.',
             'password_reset' => $plain,
         ]);
+    }
+
+    public function resendVerification(Request $request, Anggota $anggota, WhatsAppOtpService $otp): RedirectResponse
+    {
+        abort_unless($request->user()?->hasPermission('show-anggota') || $request->user()?->isSuperAdmin(), 403);
+        abort_unless($request->user()->canAccessAnggota($anggota), 403);
+
+        $anggota->loadMissing('user');
+        abort_unless($anggota->user !== null, 404);
+
+        $user = $anggota->user;
+
+        if ($user->hasVerifiedEmail()) {
+            return back()->with('status', 'Tidak perlu kirim email karena akun sudah terverifikasi.');
+        }
+
+        if ($anggota->kanal_verifikasi === SettingService::KANAL_WHATSAPP) {
+            if (! $otp->canResend($user)) {
+                return back()->withErrors(['status' => 'Tunggu sebentar sebelum mengirim ulang kode.']);
+            }
+
+            try {
+                $otp->send($user, (string) $anggota->whatsapp);
+            } catch (RuntimeException $exception) {
+                return back()->withErrors(['status' => $exception->getMessage()]);
+            }
+
+            return back()->with('status', 'Kode verifikasi WhatsApp sudah dikirim ulang.');
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return back()->with('status', 'Email verifikasi sudah dikirim ulang.');
     }
 
     public function verifyPc(UpdateAnggotaStatusRequest $request, Anggota $anggota, AnggotaStatusService $status): RedirectResponse
@@ -142,6 +189,26 @@ class AnggotaController extends Controller
         $this->assertCanProcess($request, $anggota);
 
         return $this->handleTransition(fn () => $status->reject($anggota, $request->user(), $request->string('alasan')->toString()), 'Pendaftaran ditolak.');
+    }
+
+    public function deactivate(UpdateAnggotaStatusRequest $request, Anggota $anggota, AnggotaStatusService $status): RedirectResponse
+    {
+        $this->assertCanProcess($request, $anggota);
+
+        return $this->handleTransition(
+            fn () => $status->deactivate($anggota, $request->user(), $request->string('alasan')->toString()),
+            'Anggota dinonaktifkan. Kartu tanda anggota tidak berlaku sampai diaktifkan kembali.',
+        );
+    }
+
+    public function activate(UpdateAnggotaStatusRequest $request, Anggota $anggota, AnggotaStatusService $status): RedirectResponse
+    {
+        $this->assertCanProcess($request, $anggota);
+
+        return $this->handleTransition(
+            fn () => $status->activate($anggota, $request->user(), $request->string('alasan')->toString()),
+            'Anggota diaktifkan kembali.',
+        );
     }
 
     public function dokumen(Request $request, Anggota $anggota, AnggotaDokumen $dokumen): StreamedResponse

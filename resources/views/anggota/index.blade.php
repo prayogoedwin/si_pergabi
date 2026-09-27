@@ -1,7 +1,14 @@
 <x-layouts.app>
-    <div class="mb-6">
-        <h1 class="font-display text-3xl font-bold text-navy-900 dark:text-cream-100">Anggota</h1>
-        <p class="text-navy-800/60 dark:text-cream-100/70 mt-1">Pendaftaran dan verifikasi keanggotaan · {{ $wilayahLabel }}</p>
+    <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+            <h1 class="font-display text-3xl font-bold text-navy-900 dark:text-cream-100">Anggota</h1>
+            <p class="text-navy-800/60 dark:text-cream-100/70 mt-1">Pendaftaran dan verifikasi keanggotaan · {{ $wilayahLabel }}</p>
+        </div>
+        @if (auth()->user()?->isSuperAdmin() || auth()->user()?->hasPermission('import-anggota'))
+            <a href="{{ route('anggota.import') }}">
+                <x-button type="secondary">Import Excel</x-button>
+            </a>
+        @endif
     </div>
 
     <form method="GET" class="mb-6 rounded-xl bg-white dark:bg-navy-900 border border-[#e4ddd3] dark:border-gold-400/25 p-4">
@@ -49,6 +56,7 @@
                     <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">Nama</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">NIK</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">PD / PC</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">Masa berlaku</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">Status</th>
                     <th class="px-4 py-3"></th>
                 </tr>
@@ -59,7 +67,13 @@
                         <td class="px-4 py-3 text-sm text-navy-900 dark:text-cream-100">{{ $row->namaLengkap() }}</td>
                         <td class="px-4 py-3 text-sm text-navy-800/70 dark:text-cream-100/70">{{ $row->nik }}</td>
                         <td class="px-4 py-3 text-sm text-navy-800/70 dark:text-cream-100/70">{{ $row->pd?->nama }} / {{ $row->pc?->nama }}</td>
-                        <td class="px-4 py-3 text-sm text-navy-800 dark:text-cream-100">{{ $row->statusLabel() }}</td>
+                        <td class="px-4 py-3 text-sm text-navy-800 dark:text-cream-100">
+                            <span>{{ $row->masa_berlaku_hingga?->format('d M Y') ?: '—' }}</span>
+                            @if ($row->isMasaBerlakuHabis())
+                                <span class="block text-xs font-medium text-red-600">Habis</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-sm {{ $row->isAktif() ? 'text-navy-800 dark:text-cream-100' : 'text-red-700 dark:text-red-400' }}">{{ $row->statusLabel() }}</td>
                         <td class="px-4 py-3 text-right whitespace-nowrap">
                             <a href="{{ route('anggota.show', $row) }}" class="text-sm text-navy-800 hover:underline dark:text-gold-400">Detail</a>
                             <a href="{{ route('anggota.qr', $row) }}" class="ml-3 text-sm text-navy-800 hover:underline dark:text-gold-400">QR</a>
@@ -67,7 +81,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-4 py-6 text-sm text-navy-800/50 dark:text-cream-100/50">Belum ada pendaftaran.</td>
+                        <td colspan="6" class="px-4 py-6 text-sm text-navy-800/50 dark:text-cream-100/50">Belum ada pendaftaran.</td>
                     </tr>
                 @endforelse
             </tbody>

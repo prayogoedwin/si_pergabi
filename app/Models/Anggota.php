@@ -144,8 +144,6 @@ class Anggota extends Model
     {
         return [
             'ASN' => 'ASN',
-            'PPPK' => 'PPPK',
-            'Honorer' => 'Honorer',
             'Guru Tetap Yayasan' => 'Guru Tetap Yayasan',
             'Guru Tidak Tetap' => 'Guru Tidak Tetap',
         ];
@@ -157,12 +155,15 @@ class Anggota extends Model
     public static function jenjangOptions(): array
     {
         return [
-            'TK' => 'TK',
+            'TK/PAUD' => 'TK/PAUD',
             'SD' => 'SD',
             'SMP' => 'SMP',
             'SMA' => 'SMA',
             'SMK' => 'SMK',
-            'Dhammasekha' => 'Dhammasekha',
+            'Dhammasekha TK/PAUD' => 'Dhammasekha TK/PAUD',
+            'Dhammasekha SD' => 'Dhammasekha SD',
+            'Dhammasekha SMP' => 'Dhammasekha SMP',
+            'Dhammasekha SMA' => 'Dhammasekha SMA',
         ];
     }
 
@@ -233,6 +234,32 @@ class Anggota extends Model
     public function masaBerlakuLabel(): string
     {
         return $this->masa_berlaku_hingga?->locale('id')->translatedFormat('d F Y') ?: '—';
+    }
+
+    public function isMasaBerlakuHabis(): bool
+    {
+        if ($this->masa_berlaku_hingga === null) {
+            return false;
+        }
+
+        return $this->masa_berlaku_hingga->lt(now()->startOfDay());
+    }
+
+    public function isDalamProsesVerifikasi(): bool
+    {
+        return in_array($this->status, [
+            self::STATUS_BELUM_VERIFIKASI_EMAIL,
+            self::STATUS_MENUNGGU_VERIFIKASI_PC,
+            self::STATUS_MENUNGGU_VALIDASI_PD,
+            self::STATUS_MENUNGGU_PERSETUJUAN_PP,
+        ], true);
+    }
+
+    public function canRenew(): bool
+    {
+        return filled($this->nomor_anggota)
+            && $this->isMasaBerlakuHabis()
+            && ! $this->isDalamProsesVerifikasi();
     }
 
     public function tanggalVerifikasiLabel(): string
@@ -335,7 +362,16 @@ class Anggota extends Model
 
     public function dokumen(): HasMany
     {
-        return $this->hasMany(AnggotaDokumen::class);
+        return $this->hasMany(AnggotaDokumen::class)->orderByDesc('id');
+    }
+
+    public function dokumenTerbaru(string $jenis): ?AnggotaDokumen
+    {
+        $rows = $this->relationLoaded('dokumen')
+            ? $this->dokumen
+            : $this->dokumen()->get();
+
+        return $rows->where('jenis', $jenis)->sortByDesc('id')->first();
     }
 
     public function statusLogs(): HasMany

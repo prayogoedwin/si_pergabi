@@ -16,11 +16,13 @@
     }
 </style>
 
+@if ($allowPrint ?? true)
 <div class="flex flex-wrap gap-2 mb-4 print:hidden">
     <button type="button" onclick="printKta('id')" class="rounded-xl bg-saffron-600 text-white px-4 py-2.5 text-sm font-medium">Cetak ID Card</button>
     <button type="button" onclick="printKta('a4')" class="rounded-xl bg-navy-900 text-cream-100 px-4 py-2.5 text-sm font-medium">Cetak A4 / PDF</button>
     <button type="button" onclick="unduhPng()" class="rounded-xl border border-gold-400/40 bg-white dark:bg-navy-950 px-4 py-2.5 text-sm font-medium">Unduh PNG</button>
 </div>
+@endif
 
 <div id="kta-print-root" class="kta-print-wrap flex flex-col gap-4">
     @include('kta._kartu')

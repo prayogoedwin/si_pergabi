@@ -16,7 +16,19 @@
         </div>
     </section>
 
-    @if ($anggota->status === \App\Models\Anggota::STATUS_DITOLAK)
+    @if ($anggota->canRenew())
+        <div class="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+            <p class="font-semibold">Masa berlaku habis. Status keanggotaan tidak aktif.</p>
+            <p class="mt-1">Kartu tanda anggota tidak berlaku. Ajukan verifikasi ulang seperti saat mendaftar agar pengurus memproses perpanjangan.</p>
+            <a href="{{ route('portal.perpanjang') }}" class="mt-3 inline-flex rounded-xl bg-saffron-600 text-white px-4 py-2 text-sm font-semibold">Pengajuan / verifikasi ulang</a>
+        </div>
+    @elseif ($anggota->isDalamProsesVerifikasi() && filled($anggota->nomor_anggota))
+        <div class="mt-4 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-900">
+            Pengajuan ulang sedang diproses pengurus. Riwayat status sebelumnya tetap tersimpan.
+        </div>
+    @endif
+
+    @if ($anggota->status === \App\Models\Anggota::STATUS_DITOLAK && ! $anggota->canRenew())
         <div class="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
             Pendaftaran ditolak. Hubungi pengurus cabang jika ingin mengajukan ulang.
         </div>
@@ -50,7 +62,12 @@
             <p class="text-xs text-navy-800/50">Nomor anggota</p>
             <p class="mt-1 font-semibold text-navy-900">{{ $anggota->nomor_anggota ?: 'Belum terbit' }}</p>
             <p class="text-xs text-navy-800/50 mt-3">Masa berlaku</p>
-            <p class="mt-1 text-sm">{{ $anggota->masa_berlaku_hingga?->format('d M Y') ?: '—' }}</p>
+            <p class="mt-1 text-sm {{ $anggota->isMasaBerlakuHabis() ? 'text-red-700 font-medium' : '' }}">
+                {{ $anggota->masa_berlaku_hingga?->format('d M Y') ?: '—' }}
+                @if ($anggota->isMasaBerlakuHabis())
+                    · Habis
+                @endif
+            </p>
         </div>
         <div class="rounded-2xl bg-white border border-gold-400/25 p-4">
             <p class="text-xs text-navy-800/50">Wilayah</p>
@@ -64,7 +81,13 @@
         <div>
             <p class="font-semibold {{ $anggota->canAccessKartuDigital() ? '' : 'text-navy-900' }}">Kartu tanda anggota digital</p>
             <p class="text-xs mt-1 {{ $anggota->canAccessKartuDigital() ? 'text-white/80' : 'text-navy-800/60' }}">
-                {{ $anggota->canAccessKartuDigital() ? 'Lihat, unduh, dan cetak KTA' : 'Tersedia setelah persetujuan PP' }}
+                @if ($anggota->canAccessKartuDigital())
+                    Lihat, unduh, dan cetak KTA
+                @elseif (filled($anggota->nomor_anggota))
+                    Tidak aktif
+                @else
+                    Tersedia setelah persetujuan PP
+                @endif
             </p>
         </div>
         <span class="text-xl">›</span>
@@ -75,7 +98,13 @@
         <div>
             <p class="font-semibold {{ $anggota->canAccessQrCode() ? '' : 'text-navy-900' }}">QR Code anggota</p>
             <p class="text-xs mt-1 {{ $anggota->canAccessQrCode() ? 'text-cream-100/75' : 'text-navy-800/60' }}">
-                {{ $anggota->canAccessQrCode() ? 'Pindai untuk verifikasi kartu' : 'Tersedia setelah nomor anggota terbit' }}
+                @if (! filled($anggota->nomor_anggota))
+                    Tersedia setelah nomor anggota terbit
+                @elseif ($anggota->isAktif())
+                    Pindai untuk verifikasi kartu
+                @else
+                    Tidak aktif
+                @endif
             </p>
         </div>
         <span class="text-xl">›</span>

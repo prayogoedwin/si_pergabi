@@ -24,6 +24,9 @@
         <img src="{{ $identitas['stempel_url'] }}" alt="Stempel" class="kta-stempel-depan">
     @endif
     <div class="kta-qr"><canvas data-kta-qr width="160" height="160"></canvas></div>
+    @if (! $anggota->isAktif())
+        <div class="kta-inactive-stamp"><span>Tidak aktif</span></div>
+    @endif
 </article>
 
 <article id="kta-back" class="kta-demo kta-demo-back">

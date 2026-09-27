@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Anggota;
+use App\Services\AnggotaStatusService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -10,12 +11,16 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class KtaVerifikasiController extends Controller
 {
+    public function __construct(private readonly AnggotaStatusService $status) {}
+
     public function show(Request $request): View
     {
         $kode = $this->kode($request);
         $anggota = $this->findByNomor($kode);
 
         if ($anggota) {
+            $this->status->expireIfOverdue($anggota);
+            $anggota->refresh();
             $anggota->load(['pd', 'pc', 'statusLogs']);
         }
 

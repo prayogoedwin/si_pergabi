@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Daftar Anggota — PERGABI</title>
+    <title>{{ ($renewal ?? false) ? 'Pengajuan ulang keanggotaan' : 'Daftar Anggota' }} — PERGABI</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo-pergabi.png') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=be-vietnam-pro:400,500,600,700|cormorant-garamond:600,700" rel="stylesheet">
@@ -36,13 +36,23 @@
     </style>
 </head>
 <body class="min-h-screen text-slate-800 antialiased">
+    @php
+        $renewal = $renewal ?? false;
+        $storeUrl = $storeUrl ?? route('daftar.store');
+        $prefill = $prefill ?? [];
+        $wizardSteps = $renewal
+            ? [1 => 'Pribadi', 2 => 'Kontak', 3 => 'Profesi', 4 => 'Dokumen']
+            : [1 => 'Pribadi', 2 => 'Kontak', 3 => 'Profesi', 4 => 'Dokumen', 5 => 'Akun'];
+    @endphp
     <div class="min-h-screen px-4 py-6 sm:px-6 lg:px-8"
         x-data="PergabiPendaftaran({
-            storeUrl: @js(route('daftar.store')),
+            storeUrl: @js($storeUrl),
             wilayahUrl: @js(route('daftar.wilayah')),
             csrf: @js(csrf_token()),
             verifikasi: @js($wizardConfig),
             email: @js(session('google_email')),
+            renewal: @js($renewal),
+            prefill: @js($prefill),
         })"
         @change="persist()">
         <script type="application/json" id="wizard-config">@json($wizardConfig)</script>
@@ -51,16 +61,20 @@
                 <img src="{{ asset('images/logo-pergabi.png') }}" alt="PERGABI" class="w-12 h-12 object-contain">
                 <span>
                     <span class="block font-display text-2xl tracking-[0.14em] leading-none">PERGABI</span>
-                    <span class="block text-xs text-[#fff6ea]/70 mt-1">Pendaftaran anggota</span>
+                    <span class="block text-xs text-[#fff6ea]/70 mt-1">{{ $renewal ? 'Pengajuan ulang keanggotaan' : 'Pendaftaran anggota' }}</span>
                 </span>
             </a>
-            <a href="{{ route('login') }}" class="text-sm text-[#f0c14b] hover:underline">Sudah punya akun? Masuk</a>
+            @if ($renewal)
+                <a href="{{ route('portal.show') }}" class="text-sm text-[#f0c14b] hover:underline">Kembali ke portal</a>
+            @else
+                <a href="{{ route('login') }}" class="text-sm text-[#f0c14b] hover:underline">Sudah punya akun? Masuk</a>
+            @endif
         </header>
 
         <main class="max-w-4xl mx-auto bg-[#fff8f1] rounded-3xl shadow-2xl overflow-hidden">
             <div class="px-5 sm:px-8 pt-6 pb-4 border-b border-orange-100">
-                <h1 class="font-display text-3xl sm:text-4xl text-slate-900">Formulir pendaftaran</h1>
-                <p class="text-sm text-slate-600 mt-1">Isian tersimpan otomatis di perangkat Anda. Jika koneksi terputus, Anda bisa lanjut tanpa mulai dari awal.</p>
+                <h1 class="font-display text-3xl sm:text-4xl text-slate-900">{{ $renewal ? 'Formulir pengajuan ulang' : 'Formulir pendaftaran' }}</h1>
+                <p class="text-sm text-slate-600 mt-1">{{ $renewal ? 'Lengkapi data dan unggah dokumen baru. Riwayat keanggotaan lama tetap tersimpan.' : 'Isian tersimpan otomatis di perangkat Anda. Jika koneksi terputus, Anda bisa lanjut tanpa mulai dari awal.' }}</p>
                 @if (session('status'))
                     <div class="mt-3 rounded-xl border border-saffron-600/30 bg-orange-50 px-4 py-3 text-sm text-saffron-700">
                         {{ session('status') }}
@@ -71,8 +85,8 @@
                 </p>
             </div>
 
-            <ol class="hidden md:grid grid-cols-5 gap-2 px-8 py-4 bg-white/60">
-                @foreach ([1 => 'Pribadi', 2 => 'Kontak', 3 => 'Profesi', 4 => 'Dokumen', 5 => 'Akun'] as $number => $label)
+            <ol class="hidden md:grid {{ $renewal ? 'grid-cols-4' : 'grid-cols-5' }} gap-2 px-8 py-4 bg-white/60">
+                @foreach ($wizardSteps as $number => $label)
                     <li>
                         <button type="button" class="w-full text-left" @click="go({{ $number }})">
                             <span class="flex items-center gap-2 text-sm font-semibold"
@@ -88,11 +102,11 @@
 
             <div class="md:hidden px-5 py-3 bg-white/60">
                 <div class="flex items-center justify-between text-sm font-semibold text-saffron-700">
-                    <span>Langkah <span x-text="step"></span> dari 5</span>
-                    <span x-text="['', 'Data pribadi', 'Kontak & alamat', 'Data profesi', 'Dokumen', 'Akun'][step]"></span>
+                    <span>Langkah <span x-text="step"></span> dari <span x-text="lastStep"></span></span>
+                    <span x-text="renewal ? ['', 'Data pribadi', 'Kontak & alamat', 'Data profesi', 'Dokumen'][step] : ['', 'Data pribadi', 'Kontak & alamat', 'Data profesi', 'Dokumen', 'Akun'][step]"></span>
                 </div>
                 <div class="mt-2 h-2 rounded-full bg-orange-100">
-                    <div class="h-2 rounded-full bg-saffron-600 transition-all" :style="`width: ${step * 20}%`"></div>
+                    <div class="h-2 rounded-full bg-saffron-600 transition-all" :style="`width: ${(step / lastStep) * 100}%`"></div>
                 </div>
             </div>
 
@@ -260,20 +274,12 @@
                         <input x-model="form.nuptk" class="w-full rounded-xl border-slate-300 px-4 py-2.5 bg-white">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">Nomor GTK</label>
-                        <input x-model="form.nomor_gtk" class="w-full rounded-xl border-slate-300 px-4 py-2.5 bg-white">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Mata pelajaran</label>
-                        <input x-model="form.mapel" class="w-full rounded-xl border-slate-300 px-4 py-2.5 bg-white">
-                    </div>
-                    <div>
                         <label class="block text-sm font-medium mb-1">Nama sekolah <span class="text-red-600">*</span></label>
                         <input x-model="form.nama_sekolah" class="w-full rounded-xl border-slate-300 px-4 py-2.5 bg-white">
                         <p class="text-xs text-red-600 mt-1" x-text="fieldError('nama_sekolah')"></p>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium mb-1">NPSN</label>
+                        <label class="block text-sm font-medium mb-1">NPSN <span class="text-slate-500 font-normal">(opsional)</span></label>
                         <input x-model="form.npsn" class="w-full rounded-xl border-slate-300 px-4 py-2.5 bg-white">
                     </div>
                     <div>
@@ -297,21 +303,14 @@
                     @php
                         $dokumenFields = [
                             'pas_foto' => ['label' => 'Pas foto', 'required' => true, 'image' => true],
-                            'ktp' => ['label' => 'KTP', 'required' => true, 'image' => false],
                             'sk_mengajar' => ['label' => 'SK Mengajar', 'required' => true, 'image' => false],
-                            'ijazah' => ['label' => 'Ijazah', 'required' => true, 'image' => false],
-                            'sertifikat_pendidik' => ['label' => 'Sertifikat Pendidik', 'required' => false, 'image' => false],
                         ];
                     @endphp
                     @foreach ($dokumenFields as $field => $dokumen)
-                        <div class="{{ $field === 'sertifikat_pendidik' ? 'sm:col-span-2' : '' }}">
+                        <div>
                             <label class="block text-sm font-medium mb-1">
                                 {{ $dokumen['label'] }}
-                                @if ($dokumen['required'])
-                                    <span class="text-red-600">*</span>
-                                @else
-                                    <span class="text-slate-500 font-normal">(opsional)</span>
-                                @endif
+                                <span class="text-red-600">*</span>
                             </label>
                             <input type="file" accept="{{ $dokumen['image'] ? 'image/*' : 'image/*,.pdf' }}" class="block w-full text-sm" @change="onFile('{{ $field }}', $event)">
                             <p class="text-xs text-slate-500 mt-1" x-show="files.{{ $field }}" x-text="files.{{ $field }}?.name"></p>
@@ -323,10 +322,10 @@
                             <p class="text-xs text-red-600 mt-1" x-text="fieldError('{{ $field }}')"></p>
                         </div>
                     @endforeach
-                    <p class="sm:col-span-2 text-xs text-slate-500">Pas foto wajib gambar. KTP, SK, dan ijazah boleh JPG, PNG, atau PDF. Maksimal 2 MB per berkas.</p>
+                    <p class="sm:col-span-2 text-xs text-slate-500">Pas foto wajib gambar. SK Mengajar boleh JPG, PNG, atau PDF. Maksimal 2 MB per berkas.</p>
                 </section>
 
-                <section x-show="step === 5" x-cloak class="space-y-4">
+                <section x-show="step === 5 && !renewal" x-cloak class="space-y-4">
                     <div class="rounded-2xl bg-white border border-orange-100 p-4 text-sm space-y-1">
                         <p class="font-semibold text-slate-900">Ringkasan</p>
                         <p x-text="`${form.nama} · NIK ${form.nik}`"></p>
@@ -368,8 +367,8 @@
 
             <div class="sticky bottom-0 bg-[#fff8f1]/95 backdrop-blur border-t border-orange-100 px-5 sm:px-8 py-4 flex flex-col sm:flex-row gap-3 sm:justify-between">
                 <button type="button" class="w-full sm:w-auto px-6 py-3 rounded-full border border-slate-300 font-semibold" @click="prev()" x-show="step > 1">Kembali</button>
-                <button type="button" class="w-full sm:w-auto px-8 py-3 rounded-full bg-saffron-600 hover:bg-saffron-700 text-white font-semibold" @click="next()" x-show="step < 5">Lanjut</button>
-                <button type="button" class="w-full sm:w-auto px-8 py-3 rounded-full bg-saffron-600 hover:bg-saffron-700 text-white font-semibold disabled:opacity-60" @click="submit()" x-show="step === 5" :disabled="submitting" x-text="submitting ? 'Mengirim...' : 'Kirim pendaftaran'"></button>
+                <button type="button" class="w-full sm:w-auto px-8 py-3 rounded-full bg-saffron-600 hover:bg-saffron-700 text-white font-semibold" @click="next()" x-show="step < lastStep">Lanjut</button>
+                <button type="button" class="w-full sm:w-auto px-8 py-3 rounded-full bg-saffron-600 hover:bg-saffron-700 text-white font-semibold disabled:opacity-60" @click="submit()" x-show="step === lastStep" :disabled="submitting" x-text="submitting ? 'Mengirim...' : (renewal ? 'Kirim pengajuan ulang' : 'Kirim pendaftaran')"></button>
             </div>
         </main>
     </div>

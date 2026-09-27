@@ -32,7 +32,7 @@ class PendaftaranController extends Controller
             'jenjang' => Anggota::jenjangOptions(),
             'statusSekolah' => Anggota::statusSekolahOptions(),
             'dokumenWajib' => AnggotaDokumen::requiredJenis(),
-            'dokumenLabels' => AnggotaDokumen::jenisLabels(),
+            'dokumenLabels' => AnggotaDokumen::formJenisLabels(),
             'wizardConfig' => $settings->wizardConfig(),
         ]);
     }

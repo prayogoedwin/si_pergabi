@@ -82,6 +82,19 @@ class KtaQrVerifikasiTest extends TestCase
             ->assertSee('NB:');
     }
 
+    public function test_expired_member_is_shown_as_invalid_on_public_page(): void
+    {
+        $anggota = $this->makeAktif();
+        $anggota->update(['masa_berlaku_hingga' => now()->subDay()->toDateString()]);
+
+        $this->get($anggota->urlVerifikasiQr())
+            ->assertOk()
+            ->assertSee('Kartu tidak valid')
+            ->assertSee('Tidak aktif');
+
+        $this->assertSame(Anggota::STATUS_TIDAK_AKTIF, $anggota->fresh()->status);
+    }
+
     public function test_legacy_path_redirects_to_query_kode(): void
     {
         $anggota = $this->makeAktif();

@@ -7,8 +7,10 @@ use App\Models\Role;
 use App\Models\User;
 use App\Models\Wilayah;
 use Database\Seeders\RolePermissionSeeder;
+use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -224,6 +226,48 @@ class DashboardTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_does_not_resend_verification_when_already_verified(): void
+    {
+        $this->seedWilayah();
+        $anggota = $this->makeAnggota('36', '36.71');
+        $other = $this->makeAnggota('32', '32.73');
+
+        Notification::fake();
+
+        $this->actingAs($this->adminPp())
+            ->get(route('anggota.show', $anggota))
+            ->assertOk()
+            ->assertSee('Kirim ulang verifikasi');
+
+        $this->actingAs($this->adminPp())
+            ->from(route('anggota.show', $anggota))
+            ->post(route('anggota.resend-verification', $anggota))
+            ->assertRedirect(route('anggota.show', $anggota))
+            ->assertSessionHas('status', 'Tidak perlu kirim email karena akun sudah terverifikasi.');
+
+        Notification::assertNothingSent();
+
+        $this->actingAs($this->adminPc())
+            ->post(route('anggota.resend-verification', $other))
+            ->assertForbidden();
+    }
+
+    public function test_admin_resends_verification_email_when_unverified(): void
+    {
+        $this->seedWilayah();
+        $anggota = $this->makeAnggota('36', '36.71', verified: false);
+
+        Notification::fake();
+
+        $this->actingAs($this->adminPp())
+            ->from(route('anggota.show', $anggota))
+            ->post(route('anggota.resend-verification', $anggota))
+            ->assertRedirect(route('anggota.show', $anggota))
+            ->assertSessionHas('status', 'Email verifikasi sudah dikirim ulang.');
+
+        Notification::assertSentTo($anggota->user, VerifyEmail::class);
+    }
+
     public function test_admin_can_print_kta_from_anggota_detail_when_aktif(): void
     {
         $this->seedWilayah();
@@ -240,8 +284,10 @@ class DashboardTest extends TestCase
             ->get(route('anggota.show', $pending))
             ->assertOk()
             ->assertSee('Reset password')
+            ->assertSee('Kirim ulang verifikasi')
             ->assertSee('Kartu tanda anggota')
-            ->assertDontSee('Cetak ID Card');
+            ->assertDontSee('Cetak ID Card')
+            ->assertDontSee('Nonaktifkan');
 
         $this->actingAs($this->adminPp())
             ->get(route('anggota.show', $aktif))
@@ -254,7 +300,9 @@ class DashboardTest extends TestCase
             ->assertSee('verifikasi-qr-anggota', false)
             ->assertSee('kode=', false)
             ->assertSee('data-kta-qr', false)
-            ->assertSee('js/pergabi-qr.js', false);
+            ->assertSee('js/pergabi-qr.js', false)
+            ->assertSee('Nonaktifkan')
+            ->assertSee('Status keanggotaan');
 
         $this->actingAs($this->adminPp())
             ->get(route('anggota.qr', $aktif))
@@ -269,6 +317,62 @@ class DashboardTest extends TestCase
             ->assertSee('QR Code belum tersedia');
     }
 
+    public function test_admin_can_deactivate_and_reactivate_anggota_in_scope(): void
+    {
+        $this->seedWilayah();
+        $anggota = $this->makeAnggota('36', '36.71');
+        $nomor = now()->year.'.36.3671.001';
+        $anggota->update([
+            'status' => Anggota::STATUS_AKTIF,
+            'nomor_anggota' => $nomor,
+            'tanggal_bergabung' => now()->toDateString(),
+            'masa_berlaku_hingga' => now()->addYears(3)->toDateString(),
+        ]);
+        $other = $this->makeAnggota('32', '32.73');
+        $other->update(['status' => Anggota::STATUS_AKTIF, 'nomor_anggota' => now()->year.'.32.3273.001']);
+
+        $this->actingAs($this->adminPp())
+            ->from(route('anggota.show', $anggota))
+            ->post(route('anggota.deactivate', $anggota))
+            ->assertRedirect()
+            ->assertSessionHasErrors('alasan');
+        $this->assertSame(Anggota::STATUS_AKTIF, $anggota->fresh()->status);
+
+        $this->actingAs($this->adminPp())
+            ->from(route('anggota.show', $anggota))
+            ->post(route('anggota.deactivate', $anggota), ['alasan' => 'Mengundurkan diri dari organisasi.'])
+            ->assertRedirect(route('anggota.show', $anggota))
+            ->assertSessionHas('status');
+
+        $anggota->refresh();
+        $this->assertSame(Anggota::STATUS_TIDAK_AKTIF, $anggota->status);
+        $this->assertSame($nomor, $anggota->nomor_anggota);
+        $this->assertDatabaseHas('anggota_status_log', [
+            'anggota_id' => $anggota->id,
+            'status_dari' => Anggota::STATUS_AKTIF,
+            'status_ke' => Anggota::STATUS_TIDAK_AKTIF,
+            'alasan' => 'Mengundurkan diri dari organisasi.',
+        ]);
+
+        $this->actingAs($this->adminPp())
+            ->get(route('anggota.show', $anggota))
+            ->assertOk()
+            ->assertSee('Aktifkan kembali')
+            ->assertDontSee('Cetak ID Card');
+
+        $this->actingAs($this->adminPp())
+            ->from(route('anggota.show', $anggota))
+            ->post(route('anggota.activate', $anggota))
+            ->assertRedirect(route('anggota.show', $anggota));
+
+        $this->assertSame(Anggota::STATUS_AKTIF, $anggota->fresh()->status);
+        $this->assertSame($nomor, $anggota->fresh()->nomor_anggota);
+
+        $this->actingAs($this->adminPc())
+            ->post(route('anggota.deactivate', $other), ['alasan' => 'Di luar wilayah cabang.'])
+            ->assertForbidden();
+    }
+
     private function assertDashboardTotal(string $html, int $expected): void
     {
         $this->assertMatchesRegularExpression(
@@ -277,9 +381,11 @@ class DashboardTest extends TestCase
         );
     }
 
-    private function makeAnggota(string $pd, string $pc): Anggota
+    private function makeAnggota(string $pd, string $pc, bool $verified = true): Anggota
     {
-        $user = User::factory()->create();
+        $user = $verified
+            ? User::factory()->create()
+            : User::factory()->unverified()->create();
         $user->assignRole(Role::ANGGOTA);
 
         return Anggota::query()->create([
@@ -307,7 +413,8 @@ class DashboardTest extends TestCase
             'alamat_sekolah' => 'Jl. Sekolah No. 2',
             'pd_kode' => $pd,
             'pc_kode' => $pc,
-            'status' => Anggota::STATUS_MENUNGGU_VERIFIKASI_PC,
+            'status' => $verified ? Anggota::STATUS_MENUNGGU_VERIFIKASI_PC : Anggota::STATUS_BELUM_VERIFIKASI_EMAIL,
+            'kanal_verifikasi' => $verified ? null : 'email',
         ]);
     }
 

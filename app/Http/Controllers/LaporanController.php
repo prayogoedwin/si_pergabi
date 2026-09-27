@@ -33,6 +33,23 @@ class LaporanController extends Controller
         ]);
     }
 
+    public function visual(Request $request): View
+    {
+        abort_unless($this->canView($request), 403);
+
+        $filters = $this->filters($request);
+
+        return view('laporan.visual', [
+            ...$filters,
+            'charts' => $this->laporan->charts(
+                $request->user(),
+                $filters['filterProvinsi'],
+                $filters['filterKabupaten'],
+                $filters['filterTahun'],
+            ),
+        ]);
+    }
+
     public function export(Request $request): BinaryFileResponse
     {
         abort_unless($this->canDownload($request), 403);

@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Anggota;
+use App\Models\AnggotaDokumen;
 use App\Models\Role;
 use App\Models\User;
 use Database\Seeders\RolePermissionSeeder;
+use Database\Seeders\WilayahSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
@@ -164,7 +166,7 @@ class PortalAnggotaTest extends TestCase
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
             ])
-            ->assertRedirect();
+            ->assertRedirect(route('portal.profil', ['tab' => 'akun']));
 
         $this->assertTrue(Hash::check('new-password', $user->fresh()->password));
     }
@@ -181,6 +183,85 @@ class PortalAnggotaTest extends TestCase
 
         $this->assertNotNull($user->fresh()->anggota?->foto_path);
         Storage::disk('local')->assertExists($user->fresh()->anggota->foto_path);
+    }
+
+    public function test_member_can_open_profile_tabs(): void
+    {
+        $user = $this->makeMember();
+
+        $this->actingAs($user)
+            ->get(route('portal.profil'))
+            ->assertOk()
+            ->assertSee('Pribadi')
+            ->assertSee('Kontak')
+            ->assertSee('Profesi')
+            ->assertSee('Dokumen')
+            ->assertSee('Akun')
+            ->assertSee('Simpan data')
+            ->assertSee('Ganti password')
+            ->assertSee($user->anggota->nik)
+            ->assertSee('Pas foto')
+            ->assertSee('SK Mengajar')
+            ->assertSee('TK/PAUD')
+            ->assertSee('Dhammasekha TK/PAUD')
+            ->assertSee('Dhammasekha SD')
+            ->assertSee('Dhammasekha SMP')
+            ->assertSee('Dhammasekha SMA');
+    }
+
+    public function test_member_can_update_profile_data_and_documents(): void
+    {
+        $this->seed(WilayahSeeder::class);
+        $user = $this->makeMember();
+
+        $this->actingAs($user)
+            ->put(route('portal.profil.update'), $this->profilePayload($user, [
+                'nama' => 'Guru Diperbarui',
+                'alamat' => 'Jl. Kenanga No. 9',
+                'nama_sekolah' => 'SMA Negeri 3',
+                'pas_foto' => UploadedFile::fake()->image('baru.jpg'),
+                'sk_mengajar' => UploadedFile::fake()->create('sk-baru.pdf', 80, 'application/pdf'),
+            ]))
+            ->assertRedirect(route('portal.profil', ['tab' => 'pribadi']));
+
+        $anggota = $user->fresh()->anggota;
+        $this->assertSame('Guru Diperbarui', $anggota->nama);
+        $this->assertSame('Guru Diperbarui', $user->fresh()->name);
+        $this->assertSame('Jl. Kenanga No. 9', $anggota->alamat);
+        $this->assertSame('SMA Negeri 3', $anggota->nama_sekolah);
+        $this->assertSame('36', $anggota->pd_kode);
+        $this->assertSame('36.71', $anggota->pc_kode);
+        $this->assertNotNull($anggota->foto_path);
+        $this->assertNotNull($anggota->dokumenTerbaru(AnggotaDokumen::PAS_FOTO));
+        $this->assertNotNull($anggota->dokumenTerbaru(AnggotaDokumen::SK_MENGAJAR));
+        Storage::disk('local')->assertExists($anggota->foto_path);
+    }
+
+    public function test_member_profile_keeps_existing_documents_when_files_omitted(): void
+    {
+        $this->seed(WilayahSeeder::class);
+        $user = $this->makeMember();
+        $path = 'anggota/'.$user->anggota->id.'/lama.jpg';
+        Storage::disk('local')->put($path, 'foto');
+        $user->anggota->update(['foto_path' => $path, 'nama' => 'Guru Portal']);
+        $user->anggota->dokumen()->create([
+            'jenis' => AnggotaDokumen::PAS_FOTO,
+            'path' => $path,
+            'nama_asli' => 'lama.jpg',
+            'mime' => 'image/jpeg',
+            'ukuran' => 4,
+        ]);
+
+        $this->actingAs($user)
+            ->put(route('portal.profil.update'), $this->profilePayload($user, [
+                'nama' => 'Guru Tanpa Ganti Foto',
+            ]))
+            ->assertRedirect();
+
+        $anggota = $user->fresh()->anggota;
+        $this->assertSame('Guru Tanpa Ganti Foto', $anggota->nama);
+        $this->assertSame($path, $anggota->foto_path);
+        $this->assertSame(1, $anggota->dokumen()->where('jenis', AnggotaDokumen::PAS_FOTO)->count());
     }
 
     private function makeMember(
@@ -215,6 +296,7 @@ class PortalAnggotaTest extends TestCase
             'kelurahan_kode' => '36.71.01.1001',
             'kode_pos' => '15111',
             'status_guru' => 'ASN',
+            'nip' => '199001152020011001',
             'jenjang' => 'SMA',
             'nama_sekolah' => 'SMA Negeri 1',
             'status_sekolah' => 'Negeri',
@@ -228,5 +310,44 @@ class PortalAnggotaTest extends TestCase
         ]);
 
         return $user->fresh(['anggota', 'roles']);
+    }
+
+    /**
+     * @param  array<string, mixed>  $overrides
+     * @return array<string, mixed>
+     */
+    private function profilePayload(User $user, array $overrides = []): array
+    {
+        $anggota = $user->anggota;
+
+        return array_merge([
+            'tab' => 'pribadi',
+            'nik' => $anggota->nik,
+            'nama' => $anggota->nama,
+            'gelar_depan' => $anggota->gelar_depan,
+            'gelar_belakang' => $anggota->gelar_belakang,
+            'jenis_kelamin' => $anggota->jenis_kelamin,
+            'tempat_lahir' => $anggota->tempat_lahir,
+            'tanggal_lahir' => $anggota->tanggal_lahir?->toDateString(),
+            'agama' => $anggota->agama,
+            'status_perkawinan' => $anggota->status_perkawinan,
+            'hp' => $anggota->hp,
+            'whatsapp' => $anggota->whatsapp,
+            'email' => $anggota->email,
+            'alamat' => $anggota->alamat,
+            'provinsi_kode' => $anggota->provinsi_kode,
+            'kabupaten_kode' => $anggota->kabupaten_kode,
+            'kecamatan_kode' => $anggota->kecamatan_kode,
+            'kelurahan_kode' => $anggota->kelurahan_kode,
+            'kode_pos' => $anggota->kode_pos,
+            'status_guru' => $anggota->status_guru,
+            'nip' => $anggota->nip,
+            'nuptk' => $anggota->nuptk,
+            'jenjang' => $anggota->jenjang,
+            'nama_sekolah' => $anggota->nama_sekolah,
+            'npsn' => $anggota->npsn,
+            'status_sekolah' => $anggota->status_sekolah,
+            'alamat_sekolah' => $anggota->alamat_sekolah,
+        ], $overrides);
     }
 }

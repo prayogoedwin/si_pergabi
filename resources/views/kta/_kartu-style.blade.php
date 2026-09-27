@@ -218,4 +218,24 @@
         padding: 0.85cqi 1.6cqi;
         border-radius: 1.4cqi;
     }
+    .kta-inactive-stamp {
+        position: absolute;
+        inset: 0;
+        z-index: 8;
+        display: grid;
+        place-items: center;
+        background: rgba(255, 255, 255, 0.28);
+        pointer-events: none;
+    }
+    .kta-inactive-stamp span {
+        transform: rotate(-18deg);
+        border: 0.55cqi solid #b91c1c;
+        color: #b91c1c;
+        font-weight: 800;
+        font-size: 6.2cqi;
+        letter-spacing: 0.14em;
+        padding: 0.8cqi 2.4cqi;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.72);
+    }
 </style>

@@ -6,6 +6,7 @@ use App\Models\Anggota;
 use App\Models\AnggotaStatusLog;
 use App\Models\User;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -55,7 +56,10 @@ class AnggotaStatusService
             $alasan = match ($ke) {
                 Anggota::STATUS_MENUNGGU_VALIDASI_PD => 'Diverifikasi PC.',
                 Anggota::STATUS_MENUNGGU_PERSETUJUAN_PP => 'Divalidasi PD.',
-                Anggota::STATUS_AKTIF => 'Disetujui PP.',
+                Anggota::STATUS_AKTIF => $dari === Anggota::STATUS_TIDAK_AKTIF
+                    ? 'Anggota diaktifkan kembali.'
+                    : 'Disetujui PP.',
+                Anggota::STATUS_TIDAK_AKTIF => 'Anggota dinonaktifkan.',
                 default => $alasan,
             };
         }
@@ -65,8 +69,11 @@ class AnggotaStatusService
 
             if ($ke === Anggota::STATUS_AKTIF) {
                 $anggota->tanggal_bergabung ??= now()->toDateString();
-                $anggota->masa_berlaku_hingga ??= now()->addYears((int) config('pergabi.masa_berlaku_tahun'))->toDateString();
                 $anggota->nomor_anggota ??= $this->nomorAnggota->issue($anggota);
+
+                if ($anggota->masa_berlaku_hingga === null || $anggota->isMasaBerlakuHabis()) {
+                    $anggota->masa_berlaku_hingga = now()->addYears((int) config('pergabi.masa_berlaku_tahun'))->toDateString();
+                }
             }
 
             $anggota->save();
@@ -147,6 +154,103 @@ class AnggotaStatusService
         return $this->transition($anggota, Anggota::STATUS_DITOLAK, $alasan, $aktor);
     }
 
+    public function deactivate(Anggota $anggota, User $aktor, string $alasan): Anggota
+    {
+        $this->assertPermission($aktor, 'toggle-anggota-status');
+
+        if ($anggota->status !== Anggota::STATUS_AKTIF) {
+            throw new InvalidArgumentException('Hanya anggota aktif yang dapat dinonaktifkan.');
+        }
+
+        if (filled($alasan) === false) {
+            throw new InvalidArgumentException('Alasan wajib diisi jika menonaktifkan anggota.');
+        }
+
+        return $this->transition($anggota, Anggota::STATUS_TIDAK_AKTIF, $alasan, $aktor);
+    }
+
+    public function activate(Anggota $anggota, User $aktor, string $alasan): Anggota
+    {
+        $this->assertPermission($aktor, 'toggle-anggota-status');
+
+        if ($anggota->status !== Anggota::STATUS_TIDAK_AKTIF) {
+            throw new InvalidArgumentException('Hanya anggota tidak aktif yang dapat diaktifkan kembali.');
+        }
+
+        return $this->transition(
+            $anggota,
+            Anggota::STATUS_AKTIF,
+            $alasan !== '' ? $alasan : 'Anggota diaktifkan kembali.',
+            $aktor,
+        );
+    }
+
+    public function expireIfOverdue(Anggota $anggota): Anggota
+    {
+        if ($anggota->status !== Anggota::STATUS_AKTIF || ! $anggota->isMasaBerlakuHabis()) {
+            return $anggota;
+        }
+
+        return $this->transition(
+            $anggota,
+            Anggota::STATUS_TIDAK_AKTIF,
+            'Masa berlaku keanggotaan habis.',
+            null,
+            true,
+        );
+    }
+
+    public function expireOverdue(): int
+    {
+        $count = 0;
+
+        Anggota::query()
+            ->where('status', Anggota::STATUS_AKTIF)
+            ->whereNotNull('masa_berlaku_hingga')
+            ->whereDate('masa_berlaku_hingga', '<', now()->toDateString())
+            ->orderBy('id')
+            ->chunkById(100, function ($rows) use (&$count): void {
+                foreach ($rows as $anggota) {
+                    $this->expireIfOverdue($anggota);
+                    $count++;
+                }
+            });
+
+        return $count;
+    }
+
+    public function expireOverdueLazily(): int
+    {
+        $lock = Cache::lock('pergabi.expire-anggota', 120);
+
+        if (! $lock->get()) {
+            return 0;
+        }
+
+        try {
+            return $this->expireOverdue();
+        } finally {
+            $lock->release();
+        }
+    }
+
+    public function startRenewal(Anggota $anggota, User $aktor): Anggota
+    {
+        $anggota = $this->expireIfOverdue($anggota);
+
+        if (! $anggota->canRenew()) {
+            throw new InvalidArgumentException('Keanggotaan ini belum bisa diajukan ulang.');
+        }
+
+        return $this->transition(
+            $anggota,
+            Anggota::STATUS_MENUNGGU_VERIFIKASI_PC,
+            'Pengajuan ulang keanggotaan setelah masa berlaku habis.',
+            $aktor,
+            true,
+        );
+    }
+
     private function isAllowed(string $dari, string $ke, bool $system): bool
     {
         $map = [
@@ -155,10 +259,18 @@ class AnggotaStatusService
             Anggota::STATUS_MENUNGGU_VALIDASI_PD => [Anggota::STATUS_MENUNGGU_PERSETUJUAN_PP, Anggota::STATUS_DITOLAK],
             Anggota::STATUS_MENUNGGU_PERSETUJUAN_PP => [Anggota::STATUS_AKTIF, Anggota::STATUS_DITOLAK],
             Anggota::STATUS_AKTIF => [Anggota::STATUS_TIDAK_AKTIF],
-            Anggota::STATUS_TIDAK_AKTIF => [Anggota::STATUS_AKTIF],
+            Anggota::STATUS_TIDAK_AKTIF => [Anggota::STATUS_AKTIF, Anggota::STATUS_MENUNGGU_VERIFIKASI_PC],
+            Anggota::STATUS_DITOLAK => [Anggota::STATUS_MENUNGGU_VERIFIKASI_PC],
         ];
 
         if ($dari === Anggota::STATUS_BELUM_VERIFIKASI_EMAIL && $ke === Anggota::STATUS_MENUNGGU_VERIFIKASI_PC) {
+            return $system;
+        }
+
+        if (
+            $ke === Anggota::STATUS_MENUNGGU_VERIFIKASI_PC
+            && in_array($dari, [Anggota::STATUS_TIDAK_AKTIF, Anggota::STATUS_DITOLAK], true)
+        ) {
             return $system;
         }
 

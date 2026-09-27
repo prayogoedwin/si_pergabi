@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'masa_berlaku_tahun' => (int) env('PERGABI_MASA_BERLAKU_TAHUN', 3),
+    'masa_berlaku_tahun' => (int) env('PERGABI_MASA_BERLAKU_TAHUN', 5),
     'dashboard_cache_ttl' => (int) env('PERGABI_DASHBOARD_CACHE_TTL', 3600),
     'website' => env('PERGABI_WEBSITE', 'www.pergabi.or.id'),
     'email' => env('PERGABI_EMAIL', 'sekretariat@pergabi.or.id'),

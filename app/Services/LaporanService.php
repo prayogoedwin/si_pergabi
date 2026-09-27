@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
 class LaporanService
 {
     /**
-     * @return list<array{judul: string, headings: list<string>, rows: list<list<string|int>>}>
+     * @return list<array{key: string, judul: string, headings: list<string>, rows: list<list<string|int>>}>
      */
     public function sections(User $user, ?string $provinsi, ?string $kabupaten, int $tahun): array
     {
@@ -29,21 +29,25 @@ class LaporanService
 
         return [
             [
+                'key' => 'nasional',
                 'judul' => $user->isNasional() ? 'Jumlah anggota nasional' : 'Jumlah anggota',
                 'headings' => ['Cakupan', 'Jumlah'],
                 'rows' => [[$cakupan, $total]],
             ],
             [
+                'key' => 'provinsi',
                 'judul' => 'Jumlah anggota per provinsi',
                 'headings' => ['Provinsi (PD)', 'Jumlah'],
                 'rows' => $this->wilayahRows($this->provinsiUntukLaporan($user, $provinsi), $pdCounts),
             ],
             [
+                'key' => 'kabupaten',
                 'judul' => 'Jumlah anggota per kabupaten/kota',
                 'headings' => ['Kabupaten/Kota (PC)', 'Jumlah'],
                 'rows' => $this->wilayahRows($this->kabupatenUntukLaporan($user, $provinsi, $kabupaten), $pcCounts),
             ],
             [
+                'key' => 'status',
                 'judul' => 'Anggota aktif / tidak aktif',
                 'headings' => ['Status', 'Jumlah'],
                 'rows' => [
@@ -52,25 +56,76 @@ class LaporanService
                 ],
             ],
             [
+                'key' => 'guru',
                 'judul' => 'Status guru',
                 'headings' => ['Status guru', 'Jumlah'],
                 'rows' => $this->optionRows(Anggota::statusGuruOptions(), $guruCounts),
             ],
             [
+                'key' => 'jenjang',
                 'judul' => 'Jenjang pendidikan',
                 'headings' => ['Jenjang', 'Jumlah'],
                 'rows' => $this->optionRows(Anggota::jenjangOptions(), $jenjangCounts),
             ],
             [
+                'key' => 'pendaftaran',
                 'judul' => 'Rekap pendaftaran '.$tahun,
                 'headings' => ['Bulan', 'Jumlah pendaftaran'],
                 'rows' => $this->monthly($base, 'created_at', $tahun),
             ],
             [
+                'key' => 'perpanjangan',
                 'judul' => 'Rekap perpanjangan '.$tahun,
                 'headings' => ['Bulan', 'Jumlah masa berlaku habis'],
                 'rows' => $this->monthly($base, 'masa_berlaku_hingga', $tahun),
             ],
+        ];
+    }
+
+    /**
+     * @return list<array{id: string, judul: string, type: string, categories: list<string>, data: list<int>, pie: list<array{name: string, y: int}>, empty: bool}>
+     */
+    public function charts(User $user, ?string $provinsi, ?string $kabupaten, int $tahun): array
+    {
+        return array_map(
+            fn (array $section): array => $this->sectionToChart($section),
+            $this->sections($user, $provinsi, $kabupaten, $tahun),
+        );
+    }
+
+    /**
+     * @param  array{key: string, judul: string, headings: list<string>, rows: list<list<string|int>>}  $section
+     * @return array{id: string, judul: string, type: string, categories: list<string>, data: list<int>, pie: list<array{name: string, y: int}>, empty: bool}
+     */
+    private function sectionToChart(array $section): array
+    {
+        $categories = [];
+        $data = [];
+        $pie = [];
+
+        foreach ($section['rows'] as $row) {
+            $name = (string) $row[0];
+            $y = (int) $row[1];
+            $categories[] = $name;
+            $data[] = $y;
+            $pie[] = ['name' => $name, 'y' => $y];
+        }
+
+        $type = match ($section['key']) {
+            'provinsi', 'kabupaten' => 'bar',
+            'status', 'guru' => 'pie',
+            'pendaftaran', 'perpanjangan' => 'line',
+            default => 'column',
+        };
+
+        return [
+            'id' => $section['key'],
+            'judul' => $section['judul'],
+            'type' => $type,
+            'categories' => $categories,
+            'data' => $data,
+            'pie' => $pie,
+            'empty' => $section['rows'] === [] || ($type === 'pie' && array_sum($data) === 0),
         ];
     }
 

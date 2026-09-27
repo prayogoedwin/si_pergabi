@@ -35,10 +35,21 @@ class AnggotaDokumen extends Model
     {
         return [
             self::PAS_FOTO => 'Pas foto',
-            self::KTP => 'KTP',
             self::SK_MENGAJAR => 'SK Mengajar',
+            self::KTP => 'KTP',
             self::IJAZAH => 'Ijazah',
             self::SERTIFIKAT_PENDIDIK => 'Sertifikat Pendidik',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function formJenisLabels(): array
+    {
+        return [
+            self::PAS_FOTO => 'Pas foto',
+            self::SK_MENGAJAR => 'SK Mengajar',
         ];
     }
 
@@ -49,9 +60,7 @@ class AnggotaDokumen extends Model
     {
         return [
             self::PAS_FOTO,
-            self::KTP,
             self::SK_MENGAJAR,
-            self::IJAZAH,
         ];
     }
 

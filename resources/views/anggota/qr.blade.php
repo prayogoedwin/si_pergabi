@@ -18,6 +18,12 @@
             <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">Nomor anggota terbit setelah persetujuan Pengurus Pusat. Status saat ini: {{ $anggota->statusLabel() }}.</p>
         </div>
     @else
+        @unless ($anggota->isAktif())
+            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+                <p class="font-semibold">Tidak aktif</p>
+                <p class="mt-1">Halaman verifikasi publik akan menampilkan status tidak aktif.</p>
+            </div>
+        @endunless
         <div class="max-w-lg">
             @include('kta._qr-preview', [
                 'verifikasiUrl' => $verifikasiUrl,

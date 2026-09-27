@@ -17,7 +17,7 @@ class UpdateAnggotaStatusRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'alasan' => $this->routeIs('anggota.reject')
+            'alasan' => $this->routeIs('anggota.reject', 'anggota.deactivate')
                 ? ['required', 'string', 'min:5', 'max:1000']
                 : ['nullable', 'string', 'max:1000'],
         ];

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Anggota;
 use App\Models\User;
 use App\Models\Wilayah;
+use App\Services\AnggotaStatusService;
 use App\Services\DashboardCacheService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,7 +14,10 @@ use Illuminate\View\View;
 
 class DashboardController extends Controller
 {
-    public function __construct(private readonly DashboardCacheService $dashboardCache) {}
+    public function __construct(
+        private readonly DashboardCacheService $dashboardCache,
+        private readonly AnggotaStatusService $status,
+    ) {}
 
     public function __invoke(Request $request): View|RedirectResponse
     {
@@ -40,6 +44,7 @@ class DashboardController extends Controller
         $userCount = 0;
 
         if ($canViewAnggota && $user) {
+            $this->status->expireOverdueLazily();
             $cacheKey = $this->dashboardCache->keyFor($user, $provinsi, $kabupaten);
             $stats = $this->dashboardCache->remember($cacheKey, function () use ($user, $provinsi, $kabupaten, $nasional) {
                 $counts = Anggota::query()

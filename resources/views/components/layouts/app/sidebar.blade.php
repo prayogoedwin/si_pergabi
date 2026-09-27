@@ -72,7 +72,9 @@
 
                             @if(auth()->user()->hasPermission('view-laporan'))
                             <x-layouts.sidebar-link href="{{ route('laporan.index') }}" icon='fas-file-excel'
-                                :active="request()->routeIs('laporan*')">Laporan</x-layouts.sidebar-link>
+                                :active="request()->routeIs('laporan.index') || request()->routeIs('laporan.export')">Laporan</x-layouts.sidebar-link>
+                            <x-layouts.sidebar-link href="{{ route('laporan.visual') }}" icon='fas-chart-column'
+                                :active="request()->routeIs('laporan.visual')">Laporan Visual</x-layouts.sidebar-link>
                             @endif
                         </ul>
                     </nav>

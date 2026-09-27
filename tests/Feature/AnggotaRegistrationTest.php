@@ -37,7 +37,24 @@ class AnggotaRegistrationTest extends TestCase
             ->assertOk()
             ->assertSee('Formulir pendaftaran')
             ->assertSee('tersimpan otomatis')
-            ->assertSee('pendaftaran-wizard.js');
+            ->assertSee('pendaftaran-wizard.js')
+            ->assertSee('NPSN')
+            ->assertSee('(opsional)')
+            ->assertSee('SK Mengajar')
+            ->assertSee('Pas foto')
+            ->assertSee('TK/PAUD')
+            ->assertSee('Dhammasekha TK/PAUD')
+            ->assertSee('Dhammasekha SD')
+            ->assertSee('Dhammasekha SMP')
+            ->assertSee('Dhammasekha SMA')
+            ->assertSee('Guru Tetap Yayasan')
+            ->assertSee('Guru Tidak Tetap')
+            ->assertDontSee('Honorer')
+            ->assertDontSee('Nomor GTK')
+            ->assertDontSee('Mata pelajaran')
+            ->assertDontSee('KTP')
+            ->assertDontSee('Ijazah')
+            ->assertDontSee('Sertifikat Pendidik');
 
         $this->get(route('register'))->assertOk();
     }
@@ -76,7 +93,7 @@ class AnggotaRegistrationTest extends TestCase
         $this->assertSame('36', $anggota->pd_kode);
         $this->assertSame('36.71', $anggota->pc_kode);
         $this->assertNull($anggota->nomor_anggota);
-        $this->assertSame(4, $anggota->dokumen()->count());
+        $this->assertSame(2, $anggota->dokumen()->count());
         $this->assertDatabaseHas('anggota_status_log', [
             'anggota_id' => $anggota->id,
             'status_ke' => Anggota::STATUS_BELUM_VERIFIKASI_EMAIL,
@@ -143,6 +160,7 @@ class AnggotaRegistrationTest extends TestCase
         $this->assertSame(Anggota::STATUS_AKTIF, $anggota->status);
         $this->assertSame(now()->year.'.36.3671.001', $anggota->nomor_anggota);
         $this->assertNotNull($anggota->tanggal_bergabung);
+        $this->assertSame(now()->addYears(5)->toDateString(), $anggota->masa_berlaku_hingga?->toDateString());
 
         $this->actingAs($user->fresh())
             ->get(route('portal.show'))
@@ -287,12 +305,26 @@ class AnggotaRegistrationTest extends TestCase
         $this->post(route('logout'));
 
         $anggota = User::query()->where('email', 'guru@example.com')->firstOrFail()->anggota;
-        $dokumen = $anggota->dokumen()->where('jenis', 'ktp')->firstOrFail();
+        $dokumen = $anggota->dokumen()->where('jenis', 'sk_mengajar')->firstOrFail();
 
         $this->actingAs($this->adminPp())
             ->get(route('anggota.show', $anggota))
             ->assertOk()
-            ->assertSee('KTP')
+            ->assertSee('Pribadi')
+            ->assertSee('Kontak')
+            ->assertSee('Profesi')
+            ->assertSee('Dokumen')
+            ->assertSee('Akun')
+            ->assertSee('Email')
+            ->assertSee('WhatsApp')
+            ->assertSee('guru@example.com')
+            ->assertSee('081234567890')
+            ->assertSee('SK Mengajar')
+            ->assertDontSee('KTP')
+            ->assertDontSee('Ijazah')
+            ->assertDontSee('Sertifikat Pendidik')
+            ->assertDontSee('Nomor GTK')
+            ->assertDontSee('Mata pelajaran')
             ->assertSee('Pratinjau dokumen')
             ->assertSee('Tutup')
             ->assertSee('Download');
@@ -342,9 +374,7 @@ class AnggotaRegistrationTest extends TestCase
             'password' => 'password',
             'password_confirmation' => 'password',
             'pas_foto' => UploadedFile::fake()->image('foto.jpg'),
-            'ktp' => UploadedFile::fake()->image('ktp.jpg'),
             'sk_mengajar' => UploadedFile::fake()->create('sk.pdf', 120, 'application/pdf'),
-            'ijazah' => UploadedFile::fake()->create('ijazah.pdf', 120, 'application/pdf'),
         ], $overrides);
     }
 

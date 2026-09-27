@@ -23,7 +23,7 @@ class StorePendaftaranRequest extends FormRequest
      */
     public function rules(): array
     {
-        $nipRequired = in_array($this->input('status_guru'), ['ASN', 'PPPK'], true);
+        $nipRequired = $this->input('status_guru') === 'ASN';
 
         return [
             'nik' => ['required', 'digits:16', 'unique:anggota,nik'],
@@ -47,8 +47,6 @@ class StorePendaftaranRequest extends FormRequest
             'status_guru' => ['required', Rule::in(array_keys(Anggota::statusGuruOptions()))],
             'nip' => [$nipRequired ? 'required' : 'nullable', 'string', 'max:30'],
             'nuptk' => ['nullable', 'string', 'max:30'],
-            'nomor_gtk' => ['nullable', 'string', 'max:30'],
-            'mapel' => ['nullable', 'string', 'max:100'],
             'jenjang' => ['required', Rule::in(array_keys(Anggota::jenjangOptions()))],
             'nama_sekolah' => ['required', 'string', 'max:150'],
             'npsn' => ['nullable', 'string', 'max:20'],
@@ -56,10 +54,7 @@ class StorePendaftaranRequest extends FormRequest
             'alamat_sekolah' => ['required', 'string', 'max:500'],
             'password' => ['required', 'confirmed', Password::defaults()],
             'pas_foto' => ['required', 'file', 'image', 'max:2048'],
-            'ktp' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
             'sk_mengajar' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
-            'ijazah' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
-            'sertifikat_pendidik' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
             'kanal_verifikasi' => ['nullable', 'in:email,whatsapp'],
         ];
     }
@@ -92,13 +87,11 @@ class StorePendaftaranRequest extends FormRequest
             'kode_pos' => 'kode pos',
             'status_guru' => 'status guru',
             'nama_sekolah' => 'nama sekolah',
+            'npsn' => 'NPSN',
             'status_sekolah' => 'status sekolah',
             'alamat_sekolah' => 'alamat sekolah',
             'pas_foto' => 'pas foto',
-            'ktp' => 'KTP',
             'sk_mengajar' => 'SK Mengajar',
-            'ijazah' => 'ijazah',
-            'sertifikat_pendidik' => 'sertifikat pendidik',
             'kanal_verifikasi' => 'kanal verifikasi',
         ];
     }
@@ -112,10 +105,7 @@ class StorePendaftaranRequest extends FormRequest
 
         foreach ([
             AnggotaDokumen::PAS_FOTO => 'pas_foto',
-            AnggotaDokumen::KTP => 'ktp',
             AnggotaDokumen::SK_MENGAJAR => 'sk_mengajar',
-            AnggotaDokumen::IJAZAH => 'ijazah',
-            AnggotaDokumen::SERTIFIKAT_PENDIDIK => 'sertifikat_pendidik',
         ] as $jenis => $field) {
             $file = $this->file($field);
 

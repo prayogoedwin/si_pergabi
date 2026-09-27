@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AnggotaController;
+use App\Http\Controllers\AnggotaImportController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\CacheController;
 use App\Http\Controllers\DashboardController;
@@ -127,7 +128,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('portal/kegiatan/{post}', [PortalController::class, 'kegiatanShow'])->name('portal.kegiatan.show')->whereNumber('post');
         Route::get('portal/kta', [PortalController::class, 'kta'])->name('portal.kta');
         Route::get('portal/qr', [PortalController::class, 'qr'])->name('portal.qr');
+        Route::get('portal/pengajuan-ulang', [PortalController::class, 'perpanjang'])->name('portal.perpanjang');
+        Route::post('portal/pengajuan-ulang', [PortalController::class, 'storePerpanjang'])->middleware('throttle:8,1')->name('portal.perpanjang.store');
         Route::get('portal/profil', [PortalController::class, 'profil'])->name('portal.profil');
+        Route::put('portal/profil', [PortalController::class, 'updateProfil'])->middleware('throttle:12,1')->name('portal.profil.update');
         Route::put('portal/password', [PortalController::class, 'updatePassword'])->name('portal.password');
         Route::post('portal/foto', [PortalController::class, 'updateFoto'])->name('portal.foto.update');
         Route::get('portal/foto', [PortalController::class, 'foto'])->name('portal.foto');
@@ -139,16 +143,23 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('laporan', [LaporanController::class, 'index'])->name('laporan.index')->middleware('permission:view-laporan');
     Route::get('laporan/export', [LaporanController::class, 'export'])->name('laporan.export')->middleware('permission:download-laporan');
+    Route::get('laporan-visual', [LaporanController::class, 'visual'])->name('laporan.visual')->middleware('permission:view-laporan');
 
     Route::get('anggota', [AnggotaController::class, 'index'])->name('anggota.index')->middleware('permission:view-anggota');
+    Route::get('anggota/import', [AnggotaImportController::class, 'create'])->name('anggota.import')->middleware('permission:import-anggota');
+    Route::post('anggota/import', [AnggotaImportController::class, 'store'])->name('anggota.import.store')->middleware(['permission:import-anggota', 'throttle:6,1']);
+    Route::get('anggota/import/template', [AnggotaImportController::class, 'template'])->name('anggota.import.template')->middleware('permission:import-anggota');
     Route::get('anggota/{anggota}', [AnggotaController::class, 'show'])->name('anggota.show')->middleware('permission:show-anggota');
     Route::get('anggota/{anggota}/qr', [AnggotaController::class, 'qr'])->name('anggota.qr')->middleware('permission:show-anggota');
     Route::post('anggota/{anggota}/reset-password', [AnggotaController::class, 'resetPassword'])->name('anggota.reset-password')->middleware('permission:show-anggota');
+    Route::post('anggota/{anggota}/kirim-ulang-verifikasi', [AnggotaController::class, 'resendVerification'])->name('anggota.resend-verification')->middleware(['permission:show-anggota', 'throttle:6,1']);
     Route::get('anggota/{anggota}/dokumen/{dokumen}', [AnggotaController::class, 'dokumen'])->name('anggota.dokumen');
     Route::post('anggota/{anggota}/verifikasi-pc', [AnggotaController::class, 'verifyPc'])->name('anggota.verify-pc')->middleware('permission:verify-anggota-pc');
     Route::post('anggota/{anggota}/validasi-pd', [AnggotaController::class, 'validatePd'])->name('anggota.validate-pd')->middleware('permission:validate-anggota-pd');
     Route::post('anggota/{anggota}/persetujuan-pp', [AnggotaController::class, 'approvePp'])->name('anggota.approve-pp')->middleware('permission:approve-anggota-pp');
     Route::post('anggota/{anggota}/tolak', [AnggotaController::class, 'reject'])->name('anggota.reject');
+    Route::post('anggota/{anggota}/nonaktifkan', [AnggotaController::class, 'deactivate'])->name('anggota.deactivate')->middleware('permission:toggle-anggota-status');
+    Route::post('anggota/{anggota}/aktifkan', [AnggotaController::class, 'activate'])->name('anggota.activate')->middleware('permission:toggle-anggota-status');
 });
 
 require __DIR__.'/auth.php';

@@ -26,13 +26,15 @@ class LaporanTest extends TestCase
     {
         $this->get(route('laporan.index'))->assertRedirect(route('login'));
         $this->get(route('laporan.export'))->assertRedirect(route('login'));
+        $this->get(route('laporan.visual'))->assertRedirect(route('login'));
     }
 
     public function test_anggota_cannot_view_laporan(): void
     {
-        $this->actingAs(User::query()->where('email', 'anggota@example.com')->firstOrFail())
-            ->get(route('laporan.index'))
-            ->assertForbidden();
+        $anggota = User::query()->where('email', 'anggota@example.com')->firstOrFail();
+
+        $this->actingAs($anggota)->get(route('laporan.index'))->assertForbidden();
+        $this->actingAs($anggota)->get(route('laporan.visual'))->assertForbidden();
     }
 
     public function test_pengurus_sees_laporan_menu_and_tabular_sections(): void
@@ -45,7 +47,7 @@ class LaporanTest extends TestCase
         ]);
         $this->makeAnggota('32', '32.73', [
             'status' => Anggota::STATUS_TIDAK_AKTIF,
-            'status_guru' => 'PPPK',
+            'status_guru' => 'Guru Tetap Yayasan',
             'jenjang' => 'SD',
         ]);
 
@@ -53,7 +55,9 @@ class LaporanTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee(route('laporan.index'))
-            ->assertSee('Laporan');
+            ->assertSee(route('laporan.visual'))
+            ->assertSee('Laporan')
+            ->assertSee('Laporan Visual');
 
         $this->actingAs($this->superAdmin())
             ->get(route('laporan.index'))
@@ -73,8 +77,9 @@ class LaporanTest extends TestCase
             ->assertSee('Banten')
             ->assertSee('Jawa Barat')
             ->assertSee('ASN')
-            ->assertSee('PPPK')
-            ->assertSee('Honorer')
+            ->assertSee('Guru Tetap Yayasan')
+            ->assertSee('Guru Tidak Tetap')
+            ->assertDontSee('Honorer')
             ->assertSee('SMA')
             ->assertDontSee('Total pendaftaran');
     }
@@ -139,6 +144,33 @@ class LaporanTest extends TestCase
             ->get(route('laporan.export', ['tahun' => now()->year]))
             ->assertOk()
             ->assertDownload('laporan-anggota-'.now()->year.'-'.now()->format('Y-m-d').'.xlsx');
+    }
+
+    public function test_pengurus_sees_laporan_visual_charts(): void
+    {
+        $this->makeAnggota('36', '36.71', [
+            'status' => Anggota::STATUS_AKTIF,
+            'status_guru' => 'ASN',
+            'jenjang' => 'SMA',
+            'masa_berlaku_hingga' => now()->toDateString(),
+        ]);
+
+        $this->actingAs($this->superAdmin())
+            ->get(route('laporan.visual'))
+            ->assertOk()
+            ->assertSee('Laporan Visual')
+            ->assertSee('Jumlah anggota nasional')
+            ->assertSee('Jumlah anggota per provinsi')
+            ->assertSee('Anggota aktif / tidak aktif')
+            ->assertSee('Status guru')
+            ->assertSee('Jenjang pendidikan')
+            ->assertSee('Rekap pendaftaran '.now()->year)
+            ->assertSee('Rekap perpanjangan '.now()->year)
+            ->assertSee('code.highcharts.com/highcharts.js', false)
+            ->assertSee('laporan-chart-nasional', false)
+            ->assertSee('laporan-chart-guru', false)
+            ->assertSee('laporan-chart-pendaftaran', false)
+            ->assertDontSee('Download Excel');
     }
 
     /**
