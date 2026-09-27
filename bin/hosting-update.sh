@@ -4,14 +4,19 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-PHP="${PERGABI_PHP:-/opt/cpanel/ea-php84/root/usr/bin/php}"
+PHP_BIN="${PERGABI_PHP:-/opt/cpanel/ea-php84/root/usr/bin/php}"
 
-if [[ ! -x "$PHP" ]]; then
-    echo "PHP 8.4 tidak ditemukan: $PHP" >&2
+if [[ ! -x "$PHP_BIN" ]]; then
+    echo "PHP 8.4 tidak ditemukan: $PHP_BIN" >&2
     exit 1
 fi
 
-ensure_php83_handler() {
+run_php() {
+    # Hosting mematikan proc_open; artisan/composer butuh itu di CLI.
+    "$PHP_BIN" -d disable_functions= "$@"
+}
+
+ensure_php84_handler() {
     local file="$1"
     [[ -f "$file" ]] || return 0
     if grep -q 'BEGIN PERGABI PHP84' "$file"; then
@@ -33,8 +38,8 @@ HDR
     mv "$tmp" "$file"
 }
 
-ensure_php83_handler "$ROOT/.htaccess"
-ensure_php83_handler "$ROOT/public/.htaccess"
+ensure_php84_handler "$ROOT/.htaccess"
+ensure_php84_handler "$ROOT/public/.htaccess"
 
 if [[ -d "$ROOT/.git" ]]; then
     cat > "$ROOT/.git/hooks/post-merge" << 'HOOK'
@@ -47,12 +52,13 @@ fi
 export COMPOSER_HOME="${COMPOSER_HOME:-$HOME/.composer}"
 
 if [[ ! -f "$ROOT/composer.phar" ]]; then
-    "$PHP" -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    "$PHP" composer-setup.php --install-dir="$ROOT" --filename=composer.phar --quiet
+    run_php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    run_php composer-setup.php --install-dir="$ROOT" --filename=composer.phar --quiet
     rm -f "$ROOT/composer-setup.php"
 fi
 
-"$PHP" "$ROOT/composer.phar" install --no-dev --optimize-autoloader --no-interaction
+COMPOSER_DISABLE_SCRIPTS=1 run_php "$ROOT/composer.phar" install --no-dev --optimize-autoloader --no-interaction
+run_php artisan package:discover --ansi --no-interaction
 
 chmod -R u+rwX,g+rwX "$ROOT/storage" "$ROOT/bootstrap/cache"
 
@@ -62,16 +68,16 @@ if [[ ! -f "$ROOT/.env" ]]; then
 fi
 
 if ! grep -q '^APP_KEY=base64:' "$ROOT/.env"; then
-    "$PHP" artisan key:generate --force
+    run_php artisan key:generate --force
 fi
 
-"$PHP" artisan migrate --force
-"$PHP" artisan storage:link --force >/dev/null 2>&1 || "$PHP" artisan storage:link || true
-"$PHP" artisan config:clear
-"$PHP" artisan route:clear
-"$PHP" artisan view:clear
-"$PHP" artisan config:cache
-"$PHP" artisan route:cache
-"$PHP" artisan view:cache
+run_php artisan migrate --force
+run_php artisan storage:link --force >/dev/null 2>&1 || run_php artisan storage:link || true
+run_php artisan config:clear
+run_php artisan route:clear
+run_php artisan view:clear
+run_php artisan config:cache
+run_php artisan route:cache
+run_php artisan view:cache
 
 echo "hosting-update: selesai"
