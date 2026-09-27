@@ -8,6 +8,10 @@
 /vendor
 /composer.phar
 /composer-setup.php
+/public/index.cgi
+/public/index.laravel.php
+/public/php84.cgi
+/public/__phpv.php
 .env
 .env.backup
 .env.production

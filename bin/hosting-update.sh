@@ -28,8 +28,9 @@ ensure_php84_handler() {
     cat > "$tmp" << 'HDR'
 # BEGIN PERGABI PHP84
 <IfModule mime_module>
+  AddHandler application/x-httpd-alt-php84___lsphp .php .php8 .phtml
+  AddHandler application/x-httpd-alt-php84 .php .php8 .phtml
   AddHandler application/x-httpd-ea-php84___lsphp .php .php8 .phtml
-  AddHandler application/x-httpd-ea-php84 .php .php8 .phtml
 </IfModule>
 # END PERGABI PHP84
 
@@ -38,8 +39,54 @@ HDR
     mv "$tmp" "$file"
 }
 
+install_php84_cgi() {
+    cat > "$ROOT/public/index.cgi" << 'CGI'
+#!/bin/sh
+export REDIRECT_STATUS=200
+PUBLIC="$(CDPATH= cd -- "$(dirname "$0")" && pwd)"
+export SCRIPT_FILENAME="$PUBLIC/cgi-front.php"
+cd "$PUBLIC" || exit 1
+exec /opt/alt/php84/usr/bin/php-cgi -d cgi.force_redirect=0 -d disable_functions=
+CGI
+    chmod 755 "$ROOT/public/index.cgi"
+}
+
+install_index_php_redirect() {
+    local index="$ROOT/public/index.php"
+    [[ -f "$index" ]] || return 0
+
+    if grep -q 'LARAVEL_START' "$index"; then
+        cp "$index" "$ROOT/public/index.laravel.php"
+    fi
+
+    cat > "$index" << 'PHP'
+<?php
+$uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
+$path = parse_url($uri, PHP_URL_PATH);
+if ($path === null || $path === false || $path === '') {
+    $path = '/';
+}
+$query = parse_url($uri, PHP_URL_QUERY);
+$prefix = '/index.php';
+if (substr($path, 0, strlen($prefix)) === $prefix) {
+    $path = substr($path, strlen($prefix));
+    if ($path === '' || $path[0] !== '/') {
+        $path = '/'.$path;
+    }
+}
+$location = '/index.cgi'.$path;
+if (is_string($query) && $query !== '') {
+    $location .= '?'.$query;
+}
+header('Location: '.$location, true, 302);
+exit;
+PHP
+}
+
 ensure_php84_handler "$ROOT/.htaccess"
 ensure_php84_handler "$ROOT/public/.htaccess"
+install_php84_cgi
+install_index_php_redirect
 
 if [[ -d "$ROOT/.git" ]]; then
     cat > "$ROOT/.git/hooks/post-merge" << 'HOOK'
