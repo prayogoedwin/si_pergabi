@@ -4,29 +4,29 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-PHP="${PERGABI_PHP:-/opt/cpanel/ea-php83/root/usr/bin/php}"
+PHP="${PERGABI_PHP:-/opt/cpanel/ea-php84/root/usr/bin/php}"
 
 if [[ ! -x "$PHP" ]]; then
-    echo "PHP 8.3 tidak ditemukan: $PHP" >&2
+    echo "PHP 8.4 tidak ditemukan: $PHP" >&2
     exit 1
 fi
 
 ensure_php83_handler() {
     local file="$1"
     [[ -f "$file" ]] || return 0
-    if grep -q 'BEGIN PERGABI PHP83' "$file"; then
+    if grep -q 'BEGIN PERGABI PHP84' "$file"; then
         return 0
     fi
 
     local tmp
     tmp="$(mktemp)"
     cat > "$tmp" << 'HDR'
-# BEGIN PERGABI PHP83
+# BEGIN PERGABI PHP84
 <IfModule mime_module>
-  AddHandler application/x-httpd-ea-php83___lsphp .php .php8 .phtml
-  AddHandler application/x-httpd-ea-php83 .php .php8 .phtml
+  AddHandler application/x-httpd-ea-php84___lsphp .php .php8 .phtml
+  AddHandler application/x-httpd-ea-php84 .php .php8 .phtml
 </IfModule>
-# END PERGABI PHP83
+# END PERGABI PHP84
 
 HDR
     cat "$file" >> "$tmp"
