@@ -52,8 +52,11 @@ class OrganisasiSettingTest extends TestCase
             ->assertSee('Contoh tampilan')
             ->assertSee('Halaman depan')
             ->assertSee('Halaman belakang')
-            ->assertSee('assets/kta/halaman-depan.png')
-            ->assertSee('assets/kta/halaman-belakang.png')
+            ->assertSee('assets/kta/kiri-atas.png')
+            ->assertSee('assets/kta/kanan-atas.png')
+            ->assertSee('assets/kta/logo-for-bg.png')
+            ->assertDontSee('halaman-depan.png')
+            ->assertDontSee('halaman-belakang.png')
             ->assertSee('Stempel')
             ->assertSee('TTD Ketua Umum')
             ->assertSee('Nama Ketua Umum');

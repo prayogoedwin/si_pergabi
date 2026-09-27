@@ -277,19 +277,24 @@ class SettingService
             'stempel_url' => $this->stempelUrl(),
             'ttd_ketua_umum_url' => $this->ttdKetuaUmumUrl(),
             'ttd_sekretaris_jenderal_url' => $this->ttdSekretarisJenderalUrl(),
-            'kta_halaman_depan_url' => $this->ktaHalamanDepanUrl(),
-            'kta_halaman_belakang_url' => $this->ktaHalamanBelakangUrl(),
+            'kta_ornamen' => $this->ktaOrnamen(),
         ];
     }
 
-    public function ktaHalamanDepanUrl(): string
+    /**
+     * @return array{kiri_atas: string, kanan_atas: string, kanan_bawah: string, watermark: string, lambang: string}
+     */
+    public function ktaOrnamen(): array
     {
-        return asset((string) config('pergabi.kta.halaman_depan'));
-    }
+        $paths = config('pergabi.kta.ornamen', []);
 
-    public function ktaHalamanBelakangUrl(): string
-    {
-        return asset((string) config('pergabi.kta.halaman_belakang'));
+        return [
+            'kiri_atas' => asset((string) ($paths['kiri_atas'] ?? '')),
+            'kanan_atas' => asset((string) ($paths['kanan_atas'] ?? '')),
+            'kanan_bawah' => asset((string) ($paths['kanan_bawah'] ?? '')),
+            'watermark' => asset((string) ($paths['watermark'] ?? '')),
+            'lambang' => asset((string) ($paths['lambang'] ?? '')),
+        ];
     }
 
     /**
@@ -309,8 +314,7 @@ class SettingService
             'stempel_url' => $this->stempelUrl(),
             'ttd_ketua_umum_url' => $this->ttdKetuaUmumUrl(),
             'ttd_sekretaris_jenderal_url' => $this->ttdSekretarisJenderalUrl(),
-            'kta_halaman_depan_url' => $this->ktaHalamanDepanUrl(),
-            'kta_halaman_belakang_url' => $this->ktaHalamanBelakangUrl(),
+            'kta_ornamen' => $this->ktaOrnamen(),
             'logo_custom' => $this->isCustomPublicFile('organisasi.logo'),
             'stempel_custom' => $this->isCustomPublicFile('organisasi.stempel'),
             'ttd_ketua_umum_custom' => $this->isCustomPublicFile('organisasi.ttd_ketua_umum'),

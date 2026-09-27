@@ -19,8 +19,13 @@ return [
         'ttd_sekretaris_jenderal' => 'images/organisasi/ttd-sekretaris-jenderal.png',
     ],
     'kta' => [
-        'halaman_depan' => 'assets/kta/halaman-depan.png',
-        'halaman_belakang' => 'assets/kta/halaman-belakang.png',
+        'ornamen' => [
+            'kiri_atas' => 'assets/kta/kiri-atas.png',
+            'kanan_atas' => 'assets/kta/kanan-atas.png',
+            'kanan_bawah' => 'assets/kta/kanan-bawah.png',
+            'watermark' => 'assets/kta/logo-for-bg.png',
+            'lambang' => 'assets/kta/logo.png',
+        ],
     ],
     'wp' => [
         'base_url' => env('PERGABI_WP_API_URL', 'https://pergabi.id/wp-json/wp/v2'),
