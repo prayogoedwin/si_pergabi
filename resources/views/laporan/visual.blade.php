@@ -14,8 +14,27 @@
         'resetHref' => route('laporan.visual'),
     ])
 
+    @php
+        $statCards = collect($charts)->where('type', 'card')->values();
+        $grafik = collect($charts)->where('type', '!=', 'card')->values();
+    @endphp
+
+    @if ($statCards->isNotEmpty())
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            @foreach ($statCards as $chart)
+                <div id="laporan-card-{{ $chart['id'] }}" class="bg-white dark:bg-navy-900 rounded-lg p-5 border border-[#e4ddd3] dark:border-gold-400/30 border-l-4 border-l-navy-800 dark:border-l-gold-400">
+                    <p class="text-sm font-medium text-navy-800/50 dark:text-gold-400">{{ $chart['judul'] }}</p>
+                    <p class="text-3xl font-bold text-navy-900 dark:text-cream-100 mt-1">{{ $chart['data'][0] ?? 0 }}</p>
+                    @if (! empty($chart['categories'][0]))
+                        <p class="text-xs text-navy-800/45 dark:text-cream-100/60 mt-2">{{ $chart['categories'][0] }}</p>
+                    @endif
+                </div>
+            @endforeach
+        </div>
+    @endif
+
     <div class="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        @foreach ($charts as $chart)
+        @foreach ($grafik as $chart)
             <section @class([
                 'bg-white dark:bg-navy-900 rounded-lg border border-[#e4ddd3] dark:border-gold-400/25 overflow-hidden',
                 'xl:col-span-2' => in_array($chart['type'], ['bar', 'line'], true),
@@ -48,7 +67,7 @@
             });
 
             charts.forEach(function (chart) {
-                if (chart.empty) {
+                if (chart.empty || chart.type === 'card') {
                     return;
                 }
 

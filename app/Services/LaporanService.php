@@ -95,7 +95,7 @@ class LaporanService
 
     /**
      * @param  array{key: string, judul: string, headings: list<string>, rows: list<list<string|int>>}  $section
-     * @return array{id: string, judul: string, type: string, categories: list<string>, data: list<int>, pie: list<array{name: string, y: int}>, empty: bool}
+     * @return array{id: string, judul: string, type: 'card'|'bar'|'pie'|'line'|'column', categories: list<string>, data: list<int>, pie: list<array{name: string, y: int}>, empty: bool}
      */
     private function sectionToChart(array $section): array
     {
@@ -112,6 +112,7 @@ class LaporanService
         }
 
         $type = match ($section['key']) {
+            'nasional' => 'card',
             'provinsi', 'kabupaten' => 'bar',
             'status', 'guru' => 'pie',
             'pendaftaran', 'perpanjangan' => 'line',

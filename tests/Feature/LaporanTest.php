@@ -167,7 +167,8 @@ class LaporanTest extends TestCase
             ->assertSee('Rekap pendaftaran '.now()->year)
             ->assertSee('Rekap perpanjangan '.now()->year)
             ->assertSee('code.highcharts.com/highcharts.js', false)
-            ->assertSee('laporan-chart-nasional', false)
+            ->assertSee('laporan-card-nasional', false)
+            ->assertDontSee('laporan-chart-nasional', false)
             ->assertSee('laporan-chart-guru', false)
             ->assertSee('laporan-chart-pendaftaran', false)
             ->assertDontSee('Download Excel');
