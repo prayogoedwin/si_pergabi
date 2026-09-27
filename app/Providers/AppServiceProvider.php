@@ -29,7 +29,9 @@ class AppServiceProvider extends ServiceProvider
         $appUrl = (string) config('app.url');
         if (str_contains($appUrl, '/index.cgi')) {
             URL::forceRootUrl($appUrl);
-            URL::forceScheme(parse_url($appUrl, PHP_URL_SCHEME) ?: 'https');
+        }
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
         }
 
         Event::listen(Verified::class, AdvanceAnggotaAfterEmailVerified::class);

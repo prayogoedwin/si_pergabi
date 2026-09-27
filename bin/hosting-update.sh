@@ -51,42 +51,67 @@ CGI
     chmod 755 "$ROOT/public/index.cgi"
 }
 
-install_index_php_redirect() {
+restore_laravel_index() {
     local index="$ROOT/public/index.php"
-    [[ -f "$index" ]] || return 0
+    local backup="$ROOT/public/index.laravel.php"
+    if [[ -f "$backup" ]] && ! grep -q 'LARAVEL_START' "$index" 2>/dev/null; then
+        cp "$backup" "$index"
+    fi
+}
 
-    if grep -q 'LARAVEL_START' "$index"; then
-        cp "$index" "$ROOT/public/index.laravel.php"
+ensure_public_html_front() {
+    local html
+    html="$(cd "$ROOT/.." && pwd)"
+    [[ "$(basename "$html")" == "public_html" ]] || return 0
+
+    local folder
+    folder="$(basename "$ROOT")"
+    local front="$html/.htaccess"
+    local marker='# BEGIN PERGABI FRONT'
+
+    local ini
+    ini="$(awk '/BEGIN cPanel-generated php ini/,/END cPanel-generated php ini directives/' "$front" 2>/dev/null || true)"
+
+    cat > "$front" << EOF
+Options -Indexes
+
+${marker}
+<IfModule mime_module>
+  AddHandler application/x-httpd-alt-php84___lsphp .php .php8 .phtml
+  AddHandler application/x-httpd-alt-php84 .php .php8 .phtml
+  AddHandler application/x-httpd-ea-php84___lsphp .php .php8 .phtml
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteRule ^\\.well-known/ - [L]
+
+    RewriteRule ^${folder}/public/ - [L]
+    RewriteRule ^${folder}/ - [F]
+
+    RewriteCond %{DOCUMENT_ROOT}/${folder}/public/\$1 -f
+    RewriteRule ^(.*)\$ ${folder}/public/\$1 [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ ${folder}/public/index.php [L]
+</IfModule>
+# END PERGABI FRONT
+
+EOF
+    if [[ -n "$ini" ]]; then
+        printf '%s\n' "$ini" >> "$front"
     fi
 
-    cat > "$index" << 'PHP'
-<?php
-$uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
-$path = parse_url($uri, PHP_URL_PATH);
-if ($path === null || $path === false || $path === '') {
-    $path = '/';
-}
-$query = parse_url($uri, PHP_URL_QUERY);
-$prefix = '/index.php';
-if (substr($path, 0, strlen($prefix)) === $prefix) {
-    $path = substr($path, strlen($prefix));
-    if ($path === '' || $path[0] !== '/') {
-        $path = '/'.$path;
-    }
-}
-$location = '/index.cgi'.$path;
-if (is_string($query) && $query !== '') {
-    $location .= '?'.$query;
-}
-header('Location: '.$location, true, 302);
-exit;
-PHP
+    ln -sfn "${folder}/public/index.php" "$html/index.php"
 }
 
 ensure_php84_handler "$ROOT/.htaccess"
 ensure_php84_handler "$ROOT/public/.htaccess"
 install_php84_cgi
-install_index_php_redirect
+restore_laravel_index
+ensure_public_html_front
 
 if [[ -d "$ROOT/.git" ]]; then
     cat > "$ROOT/.git/hooks/post-merge" << 'HOOK'
