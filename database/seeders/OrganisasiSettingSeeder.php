@@ -19,6 +19,8 @@ class OrganisasiSettingSeeder extends Seeder
         'organisasi.nama_sekretaris_jenderal' => 'Roch Aksiadi',
         'organisasi.visi' => 'Terwujudnya Pendidikan Agama Buddha Indonesia yang unggul, literat, dan berkarakter',
         'organisasi.misi' => '-',
+        'organisasi.ttd_ketua_umum' => 'Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal',
+        'organisasi.ttd_sekretaris_jenderal' => 'Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal',
     ];
 
     /**
@@ -27,8 +29,6 @@ class OrganisasiSettingSeeder extends Seeder
     private const FILES = [
         'organisasi.logo' => 'logo',
         'organisasi.stempel' => 'stempel',
-        'organisasi.ttd_ketua_umum' => 'ttd_ketua_umum',
-        'organisasi.ttd_sekretaris_jenderal' => 'ttd_sekretaris_jenderal',
     ];
 
     public function run(): void

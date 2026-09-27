@@ -100,7 +100,7 @@ class PortalController extends Controller
         }
 
         $anggota = $this->anggota($request);
-        $anggota->load(['dokumen', 'provinsi', 'kabupaten', 'kecamatan', 'kelurahan']);
+        $anggota->load(['dokumen', 'provinsi', 'kabupaten', 'kecamatan', 'kelurahan', 'pd', 'pc']);
 
         $provinsi = old('provinsi_kode', $anggota->provinsi_kode);
         $kabupaten = old('kabupaten_kode', $anggota->kabupaten_kode);
@@ -130,7 +130,7 @@ class PortalController extends Controller
         $pendaftaran->updateProfile($request->user(), $request->validated(), $request->dokumenUploads());
 
         return redirect()
-            ->route('portal.profil', ['tab' => $request->input('tab', 'pribadi')])
+            ->route('portal.profil', ['tab' => $request->input('tab', 'identitas')])
             ->with('status', 'Data profil berhasil diperbarui.');
     }
 
@@ -336,7 +336,7 @@ class PortalController extends Controller
     private function profilTab(Request $request): string
     {
         $tabs = [
-            'pribadi' => ['nik', 'nama', 'gelar_depan', 'gelar_belakang', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'status_perkawinan', 'pas_foto'],
+            'identitas' => ['nik', 'nama', 'gelar_depan', 'gelar_belakang', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'status_perkawinan', 'pas_foto'],
             'kontak' => ['hp', 'whatsapp', 'email', 'alamat', 'provinsi_kode', 'kabupaten_kode', 'kecamatan_kode', 'kelurahan_kode', 'kode_pos'],
             'profesi' => ['status_guru', 'nip', 'nuptk', 'jenjang', 'nama_sekolah', 'npsn', 'status_sekolah', 'alamat_sekolah'],
             'dokumen' => ['sk_mengajar'],
@@ -349,9 +349,9 @@ class PortalController extends Controller
             }
         }
 
-        $requested = $request->old('tab', $request->query('tab', 'pribadi'));
+        $requested = $request->old('tab', $request->query('tab', 'identitas'));
 
-        return array_key_exists($requested, $tabs) ? $requested : 'pribadi';
+        return array_key_exists($requested, $tabs) ? $requested : 'identitas';
     }
 
     /**

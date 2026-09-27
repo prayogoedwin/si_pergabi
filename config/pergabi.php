@@ -15,8 +15,10 @@ return [
     'files' => [
         'logo' => 'images/organisasi/logo.png',
         'stempel' => 'images/organisasi/stempel.png',
-        'ttd_ketua_umum' => 'images/organisasi/ttd-ketua-umum.png',
-        'ttd_sekretaris_jenderal' => 'images/organisasi/ttd-sekretaris-jenderal.png',
+    ],
+    'qr_pengesahan' => [
+        'ketua_umum' => 'Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal',
+        'sekretaris_jenderal' => 'Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal',
     ],
     'kta' => [
         'ornamen' => [
@@ -24,7 +26,7 @@ return [
             'kanan_atas' => 'assets/kta/kanan-atas.png',
             'kanan_bawah' => 'assets/kta/kanan-bawah.png',
             'watermark' => 'assets/kta/logo-for-bg.png',
-            'lambang' => 'assets/kta/logo.png',
+            'lambang' => 'assets/kta/bendera.png',
         ],
     ],
     'wp' => [

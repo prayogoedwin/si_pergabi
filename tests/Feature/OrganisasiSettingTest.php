@@ -38,8 +38,14 @@ class OrganisasiSettingTest extends TestCase
         $this->assertSame('-', $settings->misi());
         $this->assertStringContainsString('images/organisasi/logo.png', $settings->logoUrl());
         $this->assertStringContainsString('images/organisasi/stempel.png', $settings->stempelUrl());
-        $this->assertStringContainsString('images/organisasi/ttd-ketua-umum.png', $settings->ttdKetuaUmumUrl());
-        $this->assertStringContainsString('images/organisasi/ttd-sekretaris-jenderal.png', $settings->ttdSekretarisJenderalUrl());
+        $this->assertSame(
+            'Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal',
+            $settings->teksQrKetuaUmum(),
+        );
+        $this->assertSame(
+            'Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal',
+            $settings->teksQrSekretarisJenderal(),
+        );
         $this->assertFalse($settings->isCustomPublicFile('organisasi.logo'));
     }
 
@@ -55,10 +61,11 @@ class OrganisasiSettingTest extends TestCase
             ->assertSee('assets/kta/kiri-atas.png')
             ->assertSee('assets/kta/kanan-atas.png')
             ->assertSee('assets/kta/logo-for-bg.png')
+            ->assertSee('assets/kta/bendera.png')
             ->assertDontSee('halaman-depan.png')
             ->assertDontSee('halaman-belakang.png')
             ->assertSee('Stempel')
-            ->assertSee('TTD Ketua Umum')
+            ->assertSee('Teks QR pengesahan')
             ->assertSee('Nama Ketua Umum');
 
         $this->actingAs($this->superAdmin())
@@ -72,8 +79,8 @@ class OrganisasiSettingTest extends TestCase
                 'misi' => '-',
                 'logo' => UploadedFile::fake()->image('logo.png'),
                 'stempel' => UploadedFile::fake()->image('stempel.png'),
-                'ttd_ketua_umum' => UploadedFile::fake()->image('ttd-ketum.png'),
-                'ttd_sekretaris_jenderal' => UploadedFile::fake()->image('ttd-sekjen.png'),
+                'ttd_ketua_umum' => 'Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal',
+                'ttd_sekretaris_jenderal' => 'Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal',
             ])
             ->assertRedirect();
 
@@ -86,6 +93,51 @@ class OrganisasiSettingTest extends TestCase
         $this->assertStringContainsString('storage/organisasi', $settings->logoUrl());
         $this->assertStringContainsString('storage/organisasi', $settings->stempelUrl());
         $this->assertTrue($settings->isCustomPublicFile('organisasi.logo'));
+        $this->assertSame(
+            'Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal',
+            $settings->teksQrKetuaUmum(),
+        );
+    }
+
+    public function test_ttd_file_path_falls_back_to_qr_text_and_can_be_updated(): void
+    {
+        $this->seed(OrganisasiSettingSeeder::class);
+
+        $settings = app(SettingService::class);
+        $settings->set('organisasi.ttd_ketua_umum', 'images/organisasi/ttd-ketua-umum.png');
+        $settings->set('organisasi.ttd_sekretaris_jenderal', 'organisasi/ttd-sekjen.png');
+
+        $this->assertSame(
+            'Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal',
+            $settings->teksQrKetuaUmum(),
+        );
+        $this->assertSame(
+            'Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal',
+            $settings->teksQrSekretarisJenderal(),
+        );
+
+        $this->actingAs($this->superAdmin())
+            ->put(route('settings.organisasi.update'), [
+                'nama_lengkap' => 'PERKUMPULAN GURU AGAMA BUDDHA INDONESIA',
+                'singkatan' => 'PERGABI',
+                'alamat' => 'Jalan Kapuk Raya, Gang Mawar SCB RT 11 RW 01, Cengkareng, Jakarta Barat',
+                'nama_ketua_umum' => 'Sukiman',
+                'nama_sekretaris_jenderal' => 'Roch Aksiadi',
+                'visi' => 'Terwujudnya Pendidikan Agama Buddha Indonesia yang unggul, literat, dan berkarakter',
+                'misi' => '-',
+                'ttd_ketua_umum' => 'Disahkan Ketua Umum pada tanggal',
+                'ttd_sekretaris_jenderal' => 'Disetujui Sekretaris Jenderal pada tanggal',
+            ])
+            ->assertRedirect();
+
+        $settings = app(SettingService::class);
+
+        $this->assertSame('Disahkan Ketua Umum pada tanggal', $settings->teksQrKetuaUmum());
+        $this->assertSame('Disetujui Sekretaris Jenderal pada tanggal', $settings->teksQrSekretarisJenderal());
+        $this->assertSame(
+            'Disahkan Ketua Umum pada tanggal 22 September 2026',
+            $settings->payloadQrKetuaUmum('22 September 2026'),
+        );
     }
 
     public function test_removing_upload_restores_default_asset_path(): void
@@ -102,6 +154,8 @@ class OrganisasiSettingTest extends TestCase
                 'visi' => 'Terwujudnya Pendidikan Agama Buddha Indonesia yang unggul, literat, dan berkarakter',
                 'misi' => '-',
                 'logo' => UploadedFile::fake()->image('logo.png'),
+                'ttd_ketua_umum' => 'Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal',
+                'ttd_sekretaris_jenderal' => 'Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal',
             ])
             ->assertRedirect();
 
@@ -115,6 +169,8 @@ class OrganisasiSettingTest extends TestCase
                 'visi' => 'Terwujudnya Pendidikan Agama Buddha Indonesia yang unggul, literat, dan berkarakter',
                 'misi' => '-',
                 'logo_hapus' => '1',
+                'ttd_ketua_umum' => 'Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal',
+                'ttd_sekretaris_jenderal' => 'Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal',
             ])
             ->assertRedirect();
 

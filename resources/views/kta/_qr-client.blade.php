@@ -37,4 +37,15 @@
             });
         });
     };
+
+    window.drawPergabiQrFromData = function (selector) {
+        return new Promise(function (resolve) {
+            window.whenPergabiQrReady(function () {
+                document.querySelectorAll(selector).forEach(function (canvas) {
+                    window.drawPergabiQr(canvas, canvas.getAttribute('data-payload'), canvas.width || 120);
+                });
+                resolve();
+            });
+        });
+    };
 </script>

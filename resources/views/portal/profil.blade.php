@@ -2,16 +2,21 @@
     @php
         $input = 'w-full rounded-xl border border-navy-800/15 px-3 py-2.5 bg-cream-50';
         $pasFoto = $anggota->dokumenTerbaru(\App\Models\AnggotaDokumen::PAS_FOTO);
-        $skMengajar = $anggota->dokumenTerbaru(\App\Models\AnggotaDokumen::SK_MENGAJAR);
     @endphp
 
     <div class="mb-4">
         <h1 class="font-display text-3xl text-navy-900">Profil</h1>
-        <p class="text-sm text-navy-800/70 mt-1">Perbarui data diri, foto, dokumen, dan kata sandi akun Anda.</p>
+        <p class="text-sm text-navy-800/70 mt-1">Lengkapi dan perbarui data seperti saat mendaftar: identitas, kontak, profesi, dokumen, dan akun.</p>
         @if ($anggota->nomor_anggota)
             <p class="mt-2 text-sm font-medium">Nomor anggota {{ $anggota->nomor_anggota }} · {{ $anggota->statusLabel() }}</p>
         @endif
     </div>
+
+    @if (session('status'))
+        <div class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            {{ session('status') }}
+        </div>
+    @endif
 
     @if ($errors->any())
         <div class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
@@ -37,7 +42,7 @@
         <style>[x-cloak]{display:none!important}</style>
         <div class="overflow-x-auto border-b border-gold-400/20">
             <nav class="flex min-w-max" aria-label="Data profil">
-                @foreach (['pribadi' => 'Pribadi', 'kontak' => 'Kontak', 'profesi' => 'Profesi', 'dokumen' => 'Dokumen', 'akun' => 'Akun'] as $key => $label)
+                @foreach (['identitas' => 'Data identitas', 'kontak' => 'Kontak & alamat', 'profesi' => 'Data profesi', 'dokumen' => 'Dokumen', 'akun' => 'Akun'] as $key => $label)
                     <button type="button"
                         class="border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap"
                         :class="tab === @js($key) ? 'border-saffron-600 text-saffron-700' : 'border-transparent text-navy-800/55 hover:text-navy-900'"
@@ -51,7 +56,7 @@
             @method('PUT')
             <input type="hidden" name="tab" :value="tab">
 
-            <div x-show="tab === 'pribadi'" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div x-show="tab === 'identitas'" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div class="sm:col-span-2">
                     <p class="text-sm font-medium mb-2">Pas foto</p>
                     <div class="flex items-start gap-4">
@@ -262,10 +267,14 @@
             </div>
 
             <div x-show="tab === 'dokumen'" x-cloak class="space-y-4">
+                @php $skMengajar = $anggota->dokumenTerbaru(\App\Models\AnggotaDokumen::SK_MENGAJAR); @endphp
                 <div>
-                    <p class="text-sm font-medium">SK Mengajar</p>
+                    <p class="text-sm font-medium">SK Mengajar <span class="text-red-600">*</span></p>
                     @if ($skMengajar)
-                        <p class="text-xs text-navy-800/55 mt-1">Berkas saat ini: {{ $skMengajar->nama_asli }}</p>
+                        <p class="text-xs text-navy-800/55 mt-1">
+                            Berkas saat ini:
+                            <a href="{{ route('anggota.dokumen', [$anggota, $skMengajar]) }}" class="text-saffron-700 hover:underline" target="_blank" rel="noopener">{{ $skMengajar->nama_asli }}</a>
+                        </p>
                     @else
                         <p class="text-xs text-navy-800/55 mt-1">Belum ada berkas.</p>
                     @endif
@@ -275,9 +284,7 @@
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                @if ($pasFoto)
-                    <p class="text-xs text-navy-800/50">Pas foto diperbarui di tab Pribadi. Berkas saat ini: {{ $pasFoto->nama_asli }}</p>
-                @endif
+                <p class="text-xs text-navy-800/50">Pas foto diperbarui di tab Data identitas.</p>
             </div>
 
             <div class="mt-6 flex justify-end" x-show="tab !== 'akun'">
@@ -285,7 +292,36 @@
             </div>
         </form>
 
-        <section class="p-4 sm:p-5" x-show="tab === 'akun'" x-cloak>
+        <section class="p-4 sm:p-5 space-y-6" x-show="tab === 'akun'" x-cloak>
+            <div>
+                <h2 class="font-semibold">Data keanggotaan</h2>
+                <dl class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                    <div>
+                        <dt class="text-xs text-navy-800/55">Nomor anggota</dt>
+                        <dd class="font-medium">{{ $anggota->nomor_anggota ?: 'Belum terbit' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-navy-800/55">Status</dt>
+                        <dd class="font-medium">{{ $anggota->statusLabel() }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-navy-800/55">PD PERGABI</dt>
+                        <dd class="font-medium">{{ $anggota->labelPdPergabi() }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-navy-800/55">PC / kabupaten-kota</dt>
+                        <dd class="font-medium">{{ $anggota->kabupaten?->nama ?? $anggota->kabupaten_kode ?: '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-navy-800/55">Tanggal bergabung</dt>
+                        <dd class="font-medium">{{ $anggota->tanggal_bergabung?->translatedFormat('d F Y') ?: '—' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs text-navy-800/55">Masa berlaku</dt>
+                        <dd class="font-medium">{{ $anggota->masaBerlakuLabel() }}</dd>
+                    </div>
+                </dl>
+            </div>
             <h2 class="font-semibold">Ganti password</h2>
             <form method="POST" action="{{ route('portal.password') }}" class="mt-4 space-y-3 max-w-md">
                 @csrf
@@ -316,7 +352,7 @@
     <script>
         function portalProfil(config) {
             return {
-                tab: config.tab || 'pribadi',
+                tab: config.tab || 'identitas',
                 statusGuru: config.statusGuru || '',
                 form: {
                     provinsi_kode: config.provinsi || '',

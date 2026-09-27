@@ -14,13 +14,11 @@
             'visi' => old('visi', $values['visi']),
             'logo_url' => $values['logo_url'],
             'stempel_url' => $values['stempel_url'],
-            'ttd_ketua_umum_url' => $values['ttd_ketua_umum_url'],
-            'ttd_sekretaris_jenderal_url' => $values['ttd_sekretaris_jenderal_url'],
+            'teks_qr_ketua_umum' => old('ttd_ketua_umum', $values['teks_qr_ketua_umum']),
+            'teks_qr_sekretaris_jenderal' => old('ttd_sekretaris_jenderal', $values['teks_qr_sekretaris_jenderal']),
             'defaults' => [
                 'logo_url' => asset(config('pergabi.files.logo')),
                 'stempel_url' => asset(config('pergabi.files.stempel')),
-                'ttd_ketua_umum_url' => asset(config('pergabi.files.ttd_ketua_umum')),
-                'ttd_sekretaris_jenderal_url' => asset(config('pergabi.files.ttd_sekretaris_jenderal')),
             ],
         ];
     @endphp
@@ -28,6 +26,8 @@
     <script>
         window.__ktaIdentitasPreview = @json($ktaPreview);
     </script>
+
+    @include('kta._qr-client')
 
     <div class="space-y-6" x-data="ktaIdentitasPreview(window.__ktaIdentitasPreview)">
         @include('settings._kta-contoh')
@@ -88,8 +88,6 @@
                     @foreach ([
                         'logo' => 'Logo',
                         'stempel' => 'Stempel',
-                        'ttd_ketua_umum' => 'TTD Ketua Umum',
-                        'ttd_sekretaris_jenderal' => 'TTD Sekretaris Jenderal',
                     ] as $field => $label)
                         @php
                             $url = $values[$field.'_url'] ?? null;
@@ -115,6 +113,21 @@
                 </div>
             </div>
 
+            <div class="bg-white dark:bg-navy-900 rounded-xl border border-[#e4ddd3] dark:border-gold-400/25 p-6 space-y-4">
+                <h2 class="text-lg font-semibold text-navy-900 dark:text-cream-100">Teks QR pengesahan</h2>
+                <p class="text-sm text-navy-800/50 dark:text-cream-100/60">Teks ini masuk ke QR di halaman belakang KTA. Tanggal verifikasi PP ditambahkan otomatis di belakang teks.</p>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Ketua Umum <span class="text-red-600">*</span></label>
+                    <textarea name="ttd_ketua_umum" x-model="teks_qr_ketua_umum" rows="3" class="w-full rounded-lg">{{ old('ttd_ketua_umum', $values['teks_qr_ketua_umum']) }}</textarea>
+                    @error('ttd_ketua_umum')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Sekretaris Jenderal <span class="text-red-600">*</span></label>
+                    <textarea name="ttd_sekretaris_jenderal" x-model="teks_qr_sekretaris_jenderal" rows="3" class="w-full rounded-lg">{{ old('ttd_sekretaris_jenderal', $values['teks_qr_sekretaris_jenderal']) }}</textarea>
+                    @error('ttd_sekretaris_jenderal')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+                </div>
+            </div>
+
             <button type="submit" class="px-6 py-3 rounded-lg bg-saffron-600 hover:bg-saffron-700 text-white font-semibold">Simpan identitas</button>
         </form>
     </div>
@@ -130,11 +143,16 @@
                 visi: initial.visi,
                 logo_url: initial.logo_url,
                 stempel_url: initial.stempel_url,
-                ttd_ketua_umum_url: initial.ttd_ketua_umum_url,
-                ttd_sekretaris_jenderal_url: initial.ttd_sekretaris_jenderal_url,
+                teks_qr_ketua_umum: initial.teks_qr_ketua_umum,
+                teks_qr_sekretaris_jenderal: initial.teks_qr_sekretaris_jenderal,
                 defaults: initial.defaults,
                 init() {
-                    this.$nextTick(() => this.drawQr());
+                    this.$watch('teks_qr_ketua_umum', () => this.drawPengesahanQr());
+                    this.$watch('teks_qr_sekretaris_jenderal', () => this.drawPengesahanQr());
+                    this.$nextTick(() => {
+                        this.drawQr();
+                        this.drawPengesahanQr();
+                    });
                 },
                 previewFile(event, key) {
                     const file = event.target.files?.[0];
@@ -185,6 +203,22 @@
                             }
                         }
                     }
+                },
+                drawPengesahanQr() {
+                    const tanggal = @js(now()->locale('id')->translatedFormat('d F Y'));
+                    const targets = [
+                        [this.$refs.qrKetua, this.teks_qr_ketua_umum],
+                        [this.$refs.qrSekjen, this.teks_qr_sekretaris_jenderal],
+                    ];
+                    window.whenPergabiQrReady(() => {
+                        targets.forEach(([canvas, teks]) => {
+                            if (! canvas) {
+                                return;
+                            }
+                            const payload = [teks, tanggal].filter(Boolean).join(' ').trim();
+                            window.drawPergabiQr(canvas, payload, canvas.width || 120);
+                        });
+                    });
                 },
             };
         }

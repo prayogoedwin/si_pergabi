@@ -16,8 +16,6 @@ class OrganisasiSettingController extends Controller
     private const FILES = [
         'logo' => 'organisasi.logo',
         'stempel' => 'organisasi.stempel',
-        'ttd_ketua_umum' => 'organisasi.ttd_ketua_umum',
-        'ttd_sekretaris_jenderal' => 'organisasi.ttd_sekretaris_jenderal',
     ];
 
     public function edit(SettingService $settings): View
@@ -37,6 +35,8 @@ class OrganisasiSettingController extends Controller
             'organisasi.nama_sekretaris_jenderal' => $request->string('nama_sekretaris_jenderal')->toString(),
             'organisasi.visi' => $request->string('visi')->toString(),
             'organisasi.misi' => $request->string('misi')->toString(),
+            'organisasi.ttd_ketua_umum' => $request->string('ttd_ketua_umum')->toString(),
+            'organisasi.ttd_sekretaris_jenderal' => $request->string('ttd_sekretaris_jenderal')->toString(),
         ]);
 
         foreach (self::FILES as $field => $key) {

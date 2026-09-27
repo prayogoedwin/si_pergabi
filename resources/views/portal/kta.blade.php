@@ -7,7 +7,7 @@
         <h1 class="font-display text-3xl text-navy-900">Kartu digital</h1>
         <p class="text-sm text-navy-800/70 mt-1">
             @if ($unlocked)
-                Kartu tanda anggota PERGABI. Cetak atau unduh untuk keperluan organisasi.
+                Kartu tanda anggota PERGABI, ukuran KTP / SIM (85,60 × 53,98 mm). Cetak atau unduh untuk keperluan organisasi.
             @elseif ($hasKartu)
                 Kartu ini tidak aktif. Ajukan verifikasi ulang agar keanggotaan diproses kembali.
             @else

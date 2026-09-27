@@ -286,6 +286,16 @@ class DashboardTest extends TestCase
             ->assertSee('Reset password')
             ->assertSee('Kirim ulang verifikasi')
             ->assertSee('Kartu tanda anggota')
+            ->assertSee('Data identitas')
+            ->assertSee('Kontak & alamat')
+            ->assertSee('Data profesi')
+            ->assertSee('Dokumen')
+            ->assertSee('Keanggotaan')
+            ->assertSee('Gelar depan')
+            ->assertSee('Kecamatan')
+            ->assertSee('NUPTK')
+            ->assertDontSee('Ijazah')
+            ->assertDontSee('Sertifikat Pendidik')
             ->assertDontSee('Cetak ID Card')
             ->assertDontSee('Nonaktifkan');
 
@@ -294,13 +304,15 @@ class DashboardTest extends TestCase
             ->assertOk()
             ->assertSee('Cetak ID Card')
             ->assertSee('Cetak A4 / PDF')
-            ->assertSee('Unduh PNG')
+            ->assertSee('Unduh PNG depan')
+            ->assertSee('Unduh PNG belakang')
             ->assertSee('kta-demo-front', false)
             ->assertSee($aktif->nomor_anggota)
             ->assertSee('verifikasi-qr-anggota', false)
             ->assertSee('kode=', false)
             ->assertSee('data-kta-qr', false)
             ->assertSee('js/pergabi-qr.js', false)
+            ->assertSee('js/html-to-image.js', false)
             ->assertSee('Nonaktifkan')
             ->assertSee('Status keanggotaan');
 

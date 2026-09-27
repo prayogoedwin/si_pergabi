@@ -26,12 +26,10 @@ class UpdateOrganisasiSettingRequest extends FormRequest
             'misi' => ['required', 'string', 'max:2000'],
             'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
             'stempel' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
-            'ttd_ketua_umum' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
-            'ttd_sekretaris_jenderal' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'ttd_ketua_umum' => ['required', 'string', 'max:500'],
+            'ttd_sekretaris_jenderal' => ['required', 'string', 'max:500'],
             'logo_hapus' => ['nullable', 'boolean'],
             'stempel_hapus' => ['nullable', 'boolean'],
-            'ttd_ketua_umum_hapus' => ['nullable', 'boolean'],
-            'ttd_sekretaris_jenderal_hapus' => ['nullable', 'boolean'],
         ];
     }
 
@@ -50,8 +48,8 @@ class UpdateOrganisasiSettingRequest extends FormRequest
             'misi' => 'misi',
             'logo' => 'logo',
             'stempel' => 'stempel',
-            'ttd_ketua_umum' => 'tanda tangan Ketua Umum',
-            'ttd_sekretaris_jenderal' => 'tanda tangan Sekretaris Jenderal',
+            'ttd_ketua_umum' => 'teks QR Ketua Umum',
+            'ttd_sekretaris_jenderal' => 'teks QR Sekretaris Jenderal',
         ];
     }
 }

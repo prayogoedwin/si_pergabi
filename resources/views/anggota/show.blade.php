@@ -53,7 +53,7 @@
     <div
         class="mb-6 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm print:hidden dark:border-gray-700 dark:bg-gray-800"
         x-data="{
-            tab: 'pribadi',
+            tab: 'identitas',
             open: false,
             title: '',
             previewUrl: '',
@@ -74,7 +74,7 @@
         <style>[x-cloak]{display:none!important}</style>
         <div class="overflow-x-auto border-b border-gray-200 dark:border-gray-700">
             <nav class="flex min-w-max" aria-label="Data pendaftaran">
-                @foreach (['pribadi' => 'Pribadi', 'kontak' => 'Kontak', 'profesi' => 'Profesi', 'dokumen' => 'Dokumen', 'akun' => 'Akun'] as $key => $label)
+                @foreach (['identitas' => 'Data identitas', 'kontak' => 'Kontak & alamat', 'profesi' => 'Data profesi', 'dokumen' => 'Dokumen', 'keanggotaan' => 'Keanggotaan'] as $key => $label)
                     <button type="button"
                         class="border-b-2 px-4 py-3 text-sm font-medium whitespace-nowrap"
                         :class="tab === @js($key) ? 'border-saffron-600 text-saffron-700' : 'border-transparent text-navy-800/60 hover:text-navy-900 dark:text-cream-100/60 dark:hover:text-cream-100'"
@@ -84,7 +84,7 @@
         </div>
 
         <div class="p-6">
-            <dl x-show="tab === 'pribadi'" class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+            <dl x-show="tab === 'identitas'" class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
                 @if ($pasFoto)
                     <div class="sm:col-span-2">
                         <dt class="text-xs text-gray-500">Pas foto</dt>
@@ -236,7 +236,7 @@
                 </ul>
             </div>
 
-            <dl x-show="tab === 'akun'" x-cloak class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+            <dl x-show="tab === 'keanggotaan'" x-cloak class="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
                 <div>
                     <dt class="text-xs text-gray-500">Email login</dt>
                     <dd class="mt-0.5 text-sm font-medium">{{ $nilai($anggota->user?->email ?? $anggota->email) }}</dd>
@@ -308,7 +308,7 @@
                     <p class="mt-1">Kartu tidak berlaku sampai keanggotaan aktif kembali.</p>
                 </div>
             @else
-                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 print:hidden">Cetak ID card, A4, atau unduh gambar seperti di portal anggota.</p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 print:hidden">Preview ukuran KTP / SIM (85,60 × 53,98 mm). Cetak ID card, A4, atau unduh gambar seperti di portal anggota.</p>
             @endunless
             @include('kta._cetak', ['allowPrint' => $unlocked])
         @else

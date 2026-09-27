@@ -250,14 +250,24 @@ class SettingService
         return $this->organisasiFileUrl('organisasi.stempel', 'stempel');
     }
 
-    public function ttdKetuaUmumUrl(): string
+    public function teksQrKetuaUmum(): string
     {
-        return $this->organisasiFileUrl('organisasi.ttd_ketua_umum', 'ttd_ketua_umum');
+        return $this->teksQrPengesahan('organisasi.ttd_ketua_umum', (string) config('pergabi.qr_pengesahan.ketua_umum'));
     }
 
-    public function ttdSekretarisJenderalUrl(): string
+    public function teksQrSekretarisJenderal(): string
     {
-        return $this->organisasiFileUrl('organisasi.ttd_sekretaris_jenderal', 'ttd_sekretaris_jenderal');
+        return $this->teksQrPengesahan('organisasi.ttd_sekretaris_jenderal', (string) config('pergabi.qr_pengesahan.sekretaris_jenderal'));
+    }
+
+    public function payloadQrKetuaUmum(?string $tanggal): string
+    {
+        return $this->gabungTeksQr($this->teksQrKetuaUmum(), $tanggal);
+    }
+
+    public function payloadQrSekretarisJenderal(?string $tanggal): string
+    {
+        return $this->gabungTeksQr($this->teksQrSekretarisJenderal(), $tanggal);
     }
 
     /**
@@ -275,8 +285,8 @@ class SettingService
             'misi' => $this->misi(),
             'logo_url' => $this->logoUrl(),
             'stempel_url' => $this->stempelUrl(),
-            'ttd_ketua_umum_url' => $this->ttdKetuaUmumUrl(),
-            'ttd_sekretaris_jenderal_url' => $this->ttdSekretarisJenderalUrl(),
+            'teks_qr_ketua_umum' => $this->teksQrKetuaUmum(),
+            'teks_qr_sekretaris_jenderal' => $this->teksQrSekretarisJenderal(),
             'kta_ornamen' => $this->ktaOrnamen(),
         ];
     }
@@ -289,11 +299,11 @@ class SettingService
         $paths = config('pergabi.kta.ornamen', []);
 
         return [
-            'kiri_atas' => asset((string) ($paths['kiri_atas'] ?? '')),
-            'kanan_atas' => asset((string) ($paths['kanan_atas'] ?? '')),
-            'kanan_bawah' => asset((string) ($paths['kanan_bawah'] ?? '')),
-            'watermark' => asset((string) ($paths['watermark'] ?? '')),
-            'lambang' => asset((string) ($paths['lambang'] ?? '')),
+            'kiri_atas' => $this->versionedAsset((string) ($paths['kiri_atas'] ?? '')),
+            'kanan_atas' => $this->versionedAsset((string) ($paths['kanan_atas'] ?? '')),
+            'kanan_bawah' => $this->versionedAsset((string) ($paths['kanan_bawah'] ?? '')),
+            'watermark' => $this->versionedAsset((string) ($paths['watermark'] ?? '')),
+            'lambang' => $this->versionedAsset((string) ($paths['lambang'] ?? '')),
         ];
     }
 
@@ -312,14 +322,41 @@ class SettingService
             'misi' => $this->misi(),
             'logo_url' => $this->logoUrl(),
             'stempel_url' => $this->stempelUrl(),
-            'ttd_ketua_umum_url' => $this->ttdKetuaUmumUrl(),
-            'ttd_sekretaris_jenderal_url' => $this->ttdSekretarisJenderalUrl(),
+            'teks_qr_ketua_umum' => $this->teksQrKetuaUmum(),
+            'teks_qr_sekretaris_jenderal' => $this->teksQrSekretarisJenderal(),
             'kta_ornamen' => $this->ktaOrnamen(),
             'logo_custom' => $this->isCustomPublicFile('organisasi.logo'),
             'stempel_custom' => $this->isCustomPublicFile('organisasi.stempel'),
-            'ttd_ketua_umum_custom' => $this->isCustomPublicFile('organisasi.ttd_ketua_umum'),
-            'ttd_sekretaris_jenderal_custom' => $this->isCustomPublicFile('organisasi.ttd_sekretaris_jenderal'),
         ];
+    }
+
+    private function teksQrPengesahan(string $key, string $default): string
+    {
+        $value = trim((string) $this->get($key, $default));
+
+        if ($value === '' || $this->isLegacyTtdPath($value)) {
+            return $default;
+        }
+
+        return $value;
+    }
+
+    private function gabungTeksQr(string $teks, ?string $tanggal): string
+    {
+        $tanggal = trim((string) $tanggal);
+
+        if ($tanggal === '' || $tanggal === '—') {
+            return $teks;
+        }
+
+        return trim($teks.' '.$tanggal);
+    }
+
+    private function isLegacyTtdPath(string $value): bool
+    {
+        return str_starts_with($value, 'images/')
+            || str_starts_with($value, 'organisasi/')
+            || (bool) preg_match('/\.(png|jpe?g|webp)$/i', $value);
     }
 
     public function storePublicFile(string $key, UploadedFile $file): void
@@ -385,8 +422,6 @@ class SettingService
         $map = [
             'organisasi.logo' => 'logo',
             'organisasi.stempel' => 'stempel',
-            'organisasi.ttd_ketua_umum' => 'ttd_ketua_umum',
-            'organisasi.ttd_sekretaris_jenderal' => 'ttd_sekretaris_jenderal',
         ];
 
         $fileKey = $map[$key] ?? null;

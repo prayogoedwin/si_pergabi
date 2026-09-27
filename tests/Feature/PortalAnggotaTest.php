@@ -93,17 +93,28 @@ class PortalAnggotaTest extends TestCase
     {
         $user = $this->makeMember(Anggota::STATUS_AKTIF);
         $anggota = $user->anggota;
+        $anggota->statusLogs()->create([
+            'status_dari' => Anggota::STATUS_MENUNGGU_PERSETUJUAN_PP,
+            'status_ke' => Anggota::STATUS_AKTIF,
+            'alasan' => 'Disetujui Pengurus Pusat.',
+            'user_id' => $user->id,
+            'created_at' => now(),
+        ]);
+        $tanggalPp = $anggota->fresh()->tanggalVerifikasiLabel();
 
         $this->actingAs($user)
             ->get(route('portal.kta'))
             ->assertOk()
             ->assertSee('Cetak ID Card')
             ->assertSee('Cetak A4 / PDF')
-            ->assertSee('Unduh PNG')
+            ->assertSee('Unduh PNG depan')
+            ->assertSee('Unduh PNG belakang')
             ->assertSee('kta-demo-front', false)
             ->assertSee('kta-demo-back', false)
             ->assertSee('KARTU TANDA ANGGOTA')
             ->assertSee('DATA ANGGOTA')
+            ->assertSee('85,60')
+            ->assertSee('KTP / SIM')
             ->assertSee($anggota->namaLengkap())
             ->assertSee($anggota->nomor_anggota)
             ->assertSee($anggota->nik)
@@ -119,7 +130,11 @@ class PortalAnggotaTest extends TestCase
             ->assertSee('verifikasi-qr-anggota', false)
             ->assertSee('kode=', false)
             ->assertSee('data-kta-qr', false)
-            ->assertSee('js/pergabi-qr.js', false);
+            ->assertSee('data-kta-ttd-qr', false)
+            ->assertSee('Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal '.$tanggalPp, false)
+            ->assertSee('Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal '.$tanggalPp, false)
+            ->assertSee('js/pergabi-qr.js', false)
+            ->assertSee('js/html-to-image.js', false);
 
         $this->actingAs($user)
             ->get(route('portal.qr'))
@@ -198,16 +213,19 @@ class PortalAnggotaTest extends TestCase
         $this->actingAs($user)
             ->get(route('portal.profil'))
             ->assertOk()
-            ->assertSee('Pribadi')
-            ->assertSee('Kontak')
-            ->assertSee('Profesi')
+            ->assertSee('Data identitas')
+            ->assertSee('Kontak & alamat')
+            ->assertSee('Data profesi')
             ->assertSee('Dokumen')
             ->assertSee('Akun')
             ->assertSee('Simpan data')
             ->assertSee('Ganti password')
+            ->assertSee('Data keanggotaan')
             ->assertSee($user->anggota->nik)
             ->assertSee('Pas foto')
             ->assertSee('SK Mengajar')
+            ->assertDontSee('Ijazah')
+            ->assertDontSee('Sertifikat Pendidik')
             ->assertSee('TK/PAUD')
             ->assertSee('Dhammasekha TK/PAUD')
             ->assertSee('Dhammasekha SD')
@@ -228,7 +246,7 @@ class PortalAnggotaTest extends TestCase
                 'pas_foto' => UploadedFile::fake()->image('baru.jpg'),
                 'sk_mengajar' => UploadedFile::fake()->create('sk-baru.pdf', 80, 'application/pdf'),
             ]))
-            ->assertRedirect(route('portal.profil', ['tab' => 'pribadi']));
+            ->assertRedirect(route('portal.profil', ['tab' => 'identitas']));
 
         $anggota = $user->fresh()->anggota;
         $this->assertSame('Guru Diperbarui', $anggota->nama);
@@ -327,7 +345,7 @@ class PortalAnggotaTest extends TestCase
         $anggota = $user->anggota;
 
         return array_merge([
-            'tab' => 'pribadi',
+            'tab' => 'identitas',
             'nik' => $anggota->nik,
             'nama' => $anggota->nama,
             'gelar_depan' => $anggota->gelar_depan,
