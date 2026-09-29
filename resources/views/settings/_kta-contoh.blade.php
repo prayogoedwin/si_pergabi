@@ -59,7 +59,6 @@
                             <p class="kta-tanggal">Jakarta, {{ $tanggalTerbit }}</p>
                             <p class="kta-pengurus">Pengurus Pusat</p>
                             <div class="kta-ttd-area">
-                                <img :src="stempel_url" alt="Stempel" class="kta-stempel-belakang">
                                 <div class="kta-ttd-col">
                                     <p class="kta-ttd-jabatan">Ketua Umum,</p>
                                     <canvas x-ref="qrKetua" class="kta-ttd-qr" width="120" height="120"></canvas>

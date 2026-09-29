@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Exports\AnggotaImportTemplateExport;
 use App\Models\Anggota;
 use App\Models\Role;
 use App\Models\User;
@@ -85,6 +86,29 @@ class AnggotaImportTest extends TestCase
             ->assertDontSee('TANGGAL LAHIR');
     }
 
+    public function test_import_ignores_petunjuk_sheet_from_template(): void
+    {
+        $file = UploadedFile::fake()->createWithContent(
+            'template-import-anggota.xlsx',
+            Excel::raw(new AnggotaImportTemplateExport, \Maatwebsite\Excel\Excel::XLSX),
+        );
+
+        $this->actingAs($this->adminPp())
+            ->post(route('anggota.import.store'), [
+                'file' => $file,
+                'akun_aktif' => '1',
+                'terverifikasi' => '1',
+            ])
+            ->assertRedirect(route('anggota.import'));
+
+        $hasil = session('import_hasil');
+        $this->assertSame(2, $hasil['imported']);
+        $this->assertSame(0, $hasil['failed']);
+        $this->assertTrue(Anggota::query()->where('email', 'sinta.contoh@example.com')->exists());
+        $this->assertTrue(Anggota::query()->where('email', 'budi.contoh@example.com')->exists());
+        $this->assertFalse(Anggota::query()->where('email', 'wajib. nomor anggota lama')->exists());
+    }
+
     public function test_admin_can_import_excel_and_map_wilayah_from_nta(): void
     {
         $file = $this->excelFile([
@@ -132,6 +156,38 @@ class AnggotaImportTest extends TestCase
         $this->assertNotNull($anggota->user?->email_verified_at);
         $this->assertTrue($anggota->user->hasRole(Role::ANGGOTA));
         $this->assertTrue(Hash::check($hasil['rows'][0]['password'], $anggota->user->password));
+    }
+
+    public function test_import_uses_default_hp_when_excel_cell_empty(): void
+    {
+        $file = $this->excelFile([
+            [
+                '2026.36.3671.009',
+                'Hanuradi',
+                '',
+                'hanuradi@example.com',
+                'Ngestikarya',
+                'L',
+                'Jl. Sunter Kemayoran',
+            ],
+        ]);
+
+        $this->actingAs($this->adminPp())
+            ->post(route('anggota.import.store'), [
+                'file' => $file,
+                'akun_aktif' => '1',
+                'terverifikasi' => '1',
+            ])
+            ->assertRedirect(route('anggota.import'));
+
+        $hasil = session('import_hasil');
+        $this->assertSame(1, $hasil['imported']);
+        $this->assertSame(0, $hasil['failed']);
+
+        $anggota = Anggota::query()->where('email', 'hanuradi@example.com')->first();
+        $this->assertNotNull($anggota);
+        $this->assertSame('081', $anggota->hp);
+        $this->assertSame('081', $anggota->whatsapp);
     }
 
     public function test_import_reads_ntb_regency_code_from_nta(): void

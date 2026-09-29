@@ -7,8 +7,9 @@ use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithMultipleSheets;
 
-class AnggotaImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
+class AnggotaImport implements SkipsEmptyRows, ToCollection, WithHeadingRow, WithMultipleSheets
 {
     use Importable;
 
@@ -18,6 +19,14 @@ class AnggotaImport implements SkipsEmptyRows, ToCollection, WithHeadingRow
     public function __construct()
     {
         $this->rows = collect();
+    }
+
+    /**
+     * @return array<int, $this>
+     */
+    public function sheets(): array
+    {
+        return [0 => $this];
     }
 
     public function collection(Collection $collection): void

@@ -131,6 +131,7 @@ class PortalAnggotaTest extends TestCase
             ->assertSee('kode=', false)
             ->assertSee('data-kta-qr', false)
             ->assertSee('data-kta-ttd-qr', false)
+            ->assertDontSee('kta-stempel-belakang', false)
             ->assertSee('Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal '.$tanggalPp, false)
             ->assertSee('Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal '.$tanggalPp, false)
             ->assertSee('js/pergabi-qr.js', false)

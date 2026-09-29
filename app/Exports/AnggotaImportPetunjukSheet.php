@@ -25,7 +25,7 @@ class AnggotaImportPetunjukSheet implements FromArray, ShouldAutoSize, WithHeadi
         return [
             ['NTA', 'Wajib. Nomor anggota lama, format TAHUN.KODE_PROV.KODE_KAB.URUT. Contoh 2024.52.5208.002. Provinsi dan kabupaten/kota (PD/PC) diambil otomatis dari NTA.'],
             ['NAMA', 'Wajib. Gelar belakang boleh ditulis setelah koma, contoh: Nopiyanti, S.Pd'],
-            ['HP', 'Wajib. Nomor HP, contoh 081234567890'],
+            ['HP', 'Opsional. Contoh 081234567890. Jika kosong, sistem mengisi 081 agar kolom database terisi.'],
             ['EMAIL', 'Wajib. Dipakai sebagai akun login. Harus unik.'],
             ['TEMPAT LAHIR', 'Wajib.'],
             ['JL', 'Wajib. Laki-laki / Perempuan, atau L / P'],

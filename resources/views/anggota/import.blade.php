@@ -20,7 +20,7 @@
         <div>
             <label class="block text-sm font-medium mb-1">File Excel <span class="text-red-600">*</span></label>
             <input type="file" name="file" accept=".xlsx,.xls,.csv" class="block w-full text-sm">
-            <p class="text-xs text-navy-800/50 dark:text-cream-100/50 mt-1">xlsx, xls, atau csv. Maksimal 5 MB. Kolom minimal: NTA, NAMA, HP, EMAIL, TEMPAT LAHIR, JL, ALAMAT. Tanpa tanggal lahir. Semua baris dihitung pendaftar baru, masa aktif 5 tahun ke depan.</p>
+            <p class="text-xs text-navy-800/50 dark:text-cream-100/50 mt-1">xlsx, xls, atau csv. Maksimal 5 MB. Kolom minimal: NTA, NAMA, EMAIL, TEMPAT LAHIR, JL, ALAMAT. HP boleh kosong (diisi 081). Tanpa tanggal lahir. Semua baris dihitung pendaftar baru, masa aktif 5 tahun ke depan.</p>
             @error('file')
                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
             @enderror

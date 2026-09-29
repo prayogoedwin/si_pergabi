@@ -314,16 +314,6 @@
         margin-top: 0.7mm;
         min-height: 11.5mm;
     }
-    .kta-stempel-belakang {
-        position: absolute;
-        left: 0;
-        bottom: 0.4mm;
-        width: 12.2mm;
-        max-height: 12.8mm;
-        object-fit: contain;
-        z-index: 3;
-        pointer-events: none;
-    }
     .kta-ttd-col {
         flex: 1;
         min-width: 0;

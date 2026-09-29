@@ -16,6 +16,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ImportAnggotaService
 {
+    private const HP_DEFAULT = '081';
+
     public function __construct(
         private readonly NomorAnggotaService $nomorAnggota,
         private readonly AnggotaStatusService $status,
@@ -83,7 +85,7 @@ class ImportAnggotaService
         $nta = $this->value($cells, 'nta', 'nomor_anggota', 'no_anggota', 'nomor_nta');
         $namaLengkap = $this->value($cells, 'nama', 'name');
         $email = Str::lower($this->value($cells, 'email'));
-        $hp = $this->normalizeHp($this->value($cells, 'hp', 'no_hp', 'telepon', 'telp', 'no_telp', 'handphone'));
+        $hp = $this->normalizeHp($this->value($cells, 'hp', 'no_hp', 'telepon', 'telp', 'no_telp', 'handphone')) ?: self::HP_DEFAULT;
 
         try {
             $parsed = $this->nomorAnggota->parse($nta);
@@ -101,10 +103,6 @@ class ImportAnggotaService
 
             if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 throw new \InvalidArgumentException('Email tidak valid.');
-            }
-
-            if ($hp === '') {
-                throw new \InvalidArgumentException('HP wajib diisi.');
             }
 
             $tempatLahir = $this->value($cells, 'tempat_lahir');

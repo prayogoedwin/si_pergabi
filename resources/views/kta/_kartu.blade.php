@@ -83,11 +83,6 @@
                     <p class="kta-tanggal">Jakarta, {{ $tanggalTerbit }}</p>
                     <p class="kta-pengurus">Pengurus Pusat</p>
                     <div class="kta-ttd-area">
-                        @if (! empty($identitas['stempel_url']))
-                            <img src="{{ $identitas['stempel_url'] }}" alt="Stempel" class="kta-stempel-belakang">
-                        @else
-                            <span class="kta-stempel-belakang"></span>
-                        @endif
                         <div class="kta-ttd-col">
                             <p class="kta-ttd-jabatan">Ketua Umum,</p>
                             <canvas class="kta-ttd-qr" data-kta-ttd-qr data-payload="{{ $payloadQrKetua }}" width="120" height="120"></canvas>
