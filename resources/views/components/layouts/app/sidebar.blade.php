@@ -11,6 +11,11 @@
                             <x-layouts.sidebar-link href="{{ route('kegiatan.index') }}" icon='fas-calendar'
                                 :active="request()->routeIs('kegiatan*')">Kegiatan</x-layouts.sidebar-link>
 
+                            @if(auth()->user()->hasPermission('view-link-informasi'))
+                            <x-layouts.sidebar-link href="{{ route('link-informasi.index') }}" icon='fas-link'
+                                :active="request()->routeIs('link-informasi*')">Link Informasi</x-layouts.sidebar-link>
+                            @endif
+
                             @if(auth()->user()->hasPermission('view-wilayah') || auth()->user()->hasPermission('view-area'))
                             <x-layouts.sidebar-two-level-link-parent title="Master" icon="fas-database"
                                 :active="request()->routeIs('wilayah*') || request()->routeIs('area*')">

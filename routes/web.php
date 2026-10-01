@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KegiatanController;
 use App\Http\Controllers\KtaVerifikasiController;
 use App\Http\Controllers\LaporanController;
+use App\Http\Controllers\LinkInformasiController;
 use App\Http\Controllers\PendaftaranController;
 use App\Http\Controllers\PermissionController;
 use App\Http\Controllers\PortalController;
@@ -120,6 +121,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('wilayah/{wilayah}/edit', [WilayahController::class, 'edit'])->name('wilayah.edit')->middleware('permission:edit-wilayah')->where('wilayah', '[0-9.]+');
         Route::put('wilayah/{wilayah}', [WilayahController::class, 'update'])->name('wilayah.update')->middleware('permission:edit-wilayah')->where('wilayah', '[0-9.]+');
         Route::delete('wilayah/{wilayah}', [WilayahController::class, 'destroy'])->name('wilayah.destroy')->middleware('permission:delete-wilayah')->where('wilayah', '[0-9.]+');
+
+        Route::get('link-informasi', [LinkInformasiController::class, 'index'])->name('link-informasi.index')->middleware('permission:view-link-informasi');
+        Route::get('link-informasi/create', [LinkInformasiController::class, 'create'])->name('link-informasi.create')->middleware('permission:create-link-informasi');
+        Route::post('link-informasi', [LinkInformasiController::class, 'store'])->name('link-informasi.store')->middleware('permission:create-link-informasi');
+        Route::get('link-informasi/{linkInformasi}', [LinkInformasiController::class, 'show'])->name('link-informasi.show')->middleware('permission:show-link-informasi')->whereNumber('linkInformasi');
+        Route::get('link-informasi/{linkInformasi}/edit', [LinkInformasiController::class, 'edit'])->name('link-informasi.edit')->middleware('permission:edit-link-informasi')->whereNumber('linkInformasi');
+        Route::put('link-informasi/{linkInformasi}', [LinkInformasiController::class, 'update'])->name('link-informasi.update')->middleware('permission:edit-link-informasi')->whereNumber('linkInformasi');
+        Route::delete('link-informasi/{linkInformasi}', [LinkInformasiController::class, 'destroy'])->name('link-informasi.destroy')->middleware('permission:delete-link-informasi')->whereNumber('linkInformasi');
     });
 
     Route::middleware(['verified'])->group(function () {

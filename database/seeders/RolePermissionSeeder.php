@@ -55,6 +55,7 @@ class RolePermissionSeeder extends Seeder
             'view-integrasi',
             'edit-integrasi',
             'view-cache',
+            ...LinkInformasiPermissionSeeder::NAMES,
         ];
 
         foreach ($permissions as $permissionName) {
@@ -90,6 +91,7 @@ class RolePermissionSeeder extends Seeder
                 'toggle-anggota-status', 'import-anggota',
                 'view-laporan', 'download-laporan',
                 ...SettingPermissionSeeder::NAMES,
+                ...LinkInformasiPermissionSeeder::NAMES,
             ])->pluck('id')
         );
 
@@ -135,6 +137,7 @@ class RolePermissionSeeder extends Seeder
         $this->removeLegacyRoles($keptSlugs);
         $this->seedUsers();
         $this->call(SettingPermissionSeeder::class);
+        $this->call(LinkInformasiPermissionSeeder::class);
     }
 
     /**

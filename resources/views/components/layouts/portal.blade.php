@@ -31,6 +31,7 @@
     </script>
     <style>
         body { font-family: "Be Vietnam Pro", sans-serif; }
+        [x-cloak] { display: none !important; }
         @media print {
             .portal-chrome { display: none !important; }
             body { background: white !important; }
@@ -46,10 +47,25 @@
                 <img src="{{ asset('images/logo-pergabi.png') }}" alt="Logo PERGABI" class="h-8 w-8 object-contain shrink-0">
                 <span class="font-display text-xl tracking-[0.14em] text-gold-400">PERGABI</span>
             </a>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" class="text-xs sm:text-sm text-cream-100/80 hover:text-gold-400">Keluar</button>
-            </form>
+            <div class="flex items-center gap-3">
+                @if(($linkInformasiAktif ?? collect())->isNotEmpty())
+                    <div class="relative md:hidden" x-data="{ open: false }" @click.outside="open = false">
+                        <button type="button" @click="open = !open"
+                            class="text-xs text-cream-100/80 hover:text-gold-400">Informasi</button>
+                        <div x-show="open" x-cloak
+                            class="absolute right-0 mt-2 w-56 rounded-lg bg-navy-800 border border-gold-400/25 shadow-lg py-1 z-40">
+                            @foreach($linkInformasiAktif as $link)
+                                <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
+                                    class="block px-3 py-2 text-sm text-cream-100/90 hover:bg-navy-900 hover:text-gold-400">{{ $link->nama }}</a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="text-xs sm:text-sm text-cream-100/80 hover:text-gold-400">Keluar</button>
+                </form>
+            </div>
         </div>
         <nav class="hidden md:block border-t border-gold-400/15">
             <div class="{{ $wide ? 'max-w-5xl' : 'max-w-3xl' }} mx-auto px-4 flex gap-1">
@@ -57,6 +73,22 @@
                     class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.show') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">Beranda</a>
                 <a href="{{ route('portal.kegiatan') }}"
                     class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.kegiatan*') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">Kegiatan</a>
+                @if(($linkInformasiAktif ?? collect())->isNotEmpty())
+                    <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                        <button type="button" @click="open = !open"
+                            class="px-4 py-2.5 text-sm text-cream-100/75 hover:text-gold-400 inline-flex items-center gap-1">
+                            Informasi
+                            <svg class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+                        <div x-show="open" x-cloak
+                            class="absolute left-0 mt-0 w-56 rounded-lg bg-navy-800 border border-gold-400/25 shadow-lg py-1 z-40">
+                            @foreach($linkInformasiAktif as $link)
+                                <a href="{{ $link->url }}" target="_blank" rel="noopener noreferrer"
+                                    class="block px-3 py-2 text-sm text-cream-100/90 hover:bg-navy-900 hover:text-gold-400">{{ $link->nama }}</a>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
                 <a href="{{ route('portal.kta') }}"
                     class="px-4 py-2.5 text-sm {{ request()->routeIs('portal.kta') ? 'text-gold-400 border-b-2 border-gold-400' : 'text-cream-100/75 hover:text-gold-400' }}">Kartu digital</a>
                 <a href="{{ route('portal.qr') }}"
