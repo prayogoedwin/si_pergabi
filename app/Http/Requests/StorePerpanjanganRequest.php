@@ -13,7 +13,7 @@ class StorePerpanjanganRequest extends StorePendaftaranRequest
         $anggota = $user?->anggota;
 
         return $user !== null
-            && ! $user->isPengurus()
+            && $user->canAccessMemberPortal()
             && $anggota !== null
             && $anggota->canRenew();
     }

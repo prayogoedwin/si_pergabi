@@ -176,6 +176,35 @@ class PortalAnggotaTest extends TestCase
         $this->actingAs($admin)
             ->get(route('portal.show'))
             ->assertRedirect(route('dashboard'));
+
+        $this->actingAs($admin)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee(route('portal.show'));
+    }
+
+    public function test_pengurus_who_is_also_anggota_can_open_portal_from_header(): void
+    {
+        $user = $this->makeMember(Anggota::STATUS_AKTIF);
+        $user->assignRole(Role::ADMIN_PD);
+        $user->update(['pd_kode' => '36']);
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('dashboard', absolute: false));
+
+        $this->actingAs($user->fresh(['roles', 'anggota']))
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Portal')
+            ->assertSee(route('portal.show'));
+
+        $this->actingAs($user->fresh(['roles', 'anggota']))
+            ->get(route('portal.show'))
+            ->assertOk()
+            ->assertSee('Portal anggota')
+            ->assertSee('Guru Portal');
     }
 
     public function test_member_can_update_password_from_portal(): void

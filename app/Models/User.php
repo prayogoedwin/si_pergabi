@@ -96,17 +96,27 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->roles()->where('is_active', true)->where('slug', '!=', Role::ANGGOTA)->exists();
     }
 
+    public function hasAnggotaRecord(): bool
+    {
+        if ($this->relationLoaded('anggota')) {
+            return $this->anggota !== null;
+        }
+
+        return $this->anggota()->exists();
+    }
+
+    public function canAccessMemberPortal(): bool
+    {
+        return $this->hasAnggotaRecord() || $this->isAnggota();
+    }
+
     public function usesMemberPortal(): bool
     {
         if ($this->isPengurus()) {
             return false;
         }
 
-        $hasAnggota = $this->relationLoaded('anggota')
-            ? $this->anggota !== null
-            : $this->anggota()->exists();
-
-        return $hasAnggota || $this->isAnggota();
+        return $this->canAccessMemberPortal();
     }
 
     /**

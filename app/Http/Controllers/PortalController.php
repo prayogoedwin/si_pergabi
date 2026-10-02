@@ -341,13 +341,17 @@ class PortalController extends Controller
 
     private function redirectPengurus(Request $request): ?RedirectResponse
     {
-        if ($request->user()?->isPengurus()) {
+        $user = $request->user();
+
+        if ($user?->canAccessMemberPortal()) {
+            return null;
+        }
+
+        if ($user?->isPengurus()) {
             return redirect()->route('dashboard');
         }
 
-        abort_unless($request->user()?->usesMemberPortal(), 403);
-
-        return null;
+        abort(403);
     }
 
     private function anggota(Request $request): Anggota

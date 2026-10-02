@@ -101,6 +101,19 @@
 
                 <div x-show="open" @click.away="open = false" :class="{ 'block': open, 'hidden': !open }"
                     class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-navy-800 rounded-md shadow-lg py-1 z-50 border border-[#e4ddd3] dark:border-gold-400/20">
+                    @if (auth()->user()->canAccessMemberPortal())
+                        <a href="{{ route('portal.show') }}"
+                            class="block px-4 py-2 text-sm text-navy-800 dark:text-cream-100 hover:bg-cream-50 dark:hover:bg-navy-900 dark:hover:text-gold-400">
+                            <div class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                                Portal
+                            </div>
+                        </a>
+                    @endif
                     <a href="{{ route('settings.profile.edit') }}"
                         class="block px-4 py-2 text-sm text-navy-800 dark:text-cream-100 hover:bg-cream-50 dark:hover:bg-navy-900 dark:hover:text-gold-400">
                         <div class="flex items-center">

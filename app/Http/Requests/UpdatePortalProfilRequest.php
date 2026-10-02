@@ -13,7 +13,7 @@ class UpdatePortalProfilRequest extends StorePendaftaranRequest
         $user = $this->user();
 
         return $user !== null
-            && ! $user->isPengurus()
+            && $user->canAccessMemberPortal()
             && $user->anggota !== null;
     }
 
