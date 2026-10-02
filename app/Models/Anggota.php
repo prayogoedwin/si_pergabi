@@ -268,7 +268,11 @@ class Anggota extends Model
             ? $this->statusLogs->where('status_ke', self::STATUS_AKTIF)->sortBy('created_at')->first()
             : $this->statusLogs()->where('status_ke', self::STATUS_AKTIF)->oldest()->first();
 
-        return $log?->created_at?->locale('id')->translatedFormat('d F Y') ?: '—';
+        $tanggal = $log?->created_at
+            ?? $this->tanggal_bergabung
+            ?? $this->created_at;
+
+        return $tanggal?->locale('id')->translatedFormat('d F Y') ?: '—';
     }
 
     public function isAktif(): bool

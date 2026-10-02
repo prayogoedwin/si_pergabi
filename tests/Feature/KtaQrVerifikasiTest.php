@@ -95,6 +95,14 @@ class KtaQrVerifikasiTest extends TestCase
         $this->assertSame(Anggota::STATUS_TIDAK_AKTIF, $anggota->fresh()->status);
     }
 
+    public function test_tanggal_verifikasi_falls_back_to_tanggal_bergabung(): void
+    {
+        $anggota = $this->makeAktif();
+        $anggota->update(['tanggal_bergabung' => '2026-10-01']);
+
+        $this->assertSame('01 Oktober 2026', $anggota->fresh()->tanggalVerifikasiLabel());
+    }
+
     public function test_legacy_path_redirects_to_query_kode(): void
     {
         $anggota = $this->makeAktif();

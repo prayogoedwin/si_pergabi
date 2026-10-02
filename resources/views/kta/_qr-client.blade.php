@@ -1,4 +1,4 @@
-<script src="{{ asset('js/pergabi-qr.js') }}"></script>
+<script src="{{ asset('js/pergabi-qr.js') }}?v={{ @filemtime(public_path('js/pergabi-qr.js')) ?: '1' }}"></script>
 <script>
     window.whenPergabiQrReady = function (callback) {
         if (window.PergabiQr) {
@@ -31,6 +31,9 @@
         return new Promise(function (resolve) {
             window.whenPergabiQrReady(function () {
                 document.querySelectorAll(selector).forEach(function (canvas) {
+                    if (canvas.hasAttribute('data-kta-pengesahan')) {
+                        return;
+                    }
                     window.drawPergabiQr(canvas, payload, size);
                 });
                 resolve();
@@ -38,11 +41,12 @@
         });
     };
 
-    window.drawPergabiQrFromData = function (selector) {
+    window.drawPergabiQrMap = function (selector, payloads) {
         return new Promise(function (resolve) {
             window.whenPergabiQrReady(function () {
                 document.querySelectorAll(selector).forEach(function (canvas) {
-                    window.drawPergabiQr(canvas, canvas.getAttribute('data-payload'), canvas.width || 120);
+                    var key = canvas.getAttribute('data-kta-pengesahan');
+                    window.drawPergabiQr(canvas, payloads && payloads[key], canvas.width || 160);
                 });
                 resolve();
             });

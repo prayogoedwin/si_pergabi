@@ -542,7 +542,7 @@
         var ctx = canvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, px, px);
-        var quiet = 2;
+        var quiet = 4;
         var cell = px / (n + quiet * 2);
         ctx.fillStyle = '#071422';
         for (var y = 0; y < n; y++) {

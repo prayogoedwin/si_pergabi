@@ -1,10 +1,6 @@
 @php
     $tanggalTerbit = ($anggota->tanggal_bergabung ?? now())->locale('id')->translatedFormat('d F Y');
     $namaDepanKartu = strtoupper((string) ($anggota->nama ?: $anggota->namaLengkap()));
-    $tanggalPp = $anggota->tanggalVerifikasiLabel();
-    $settings = app(\App\Services\SettingService::class);
-    $payloadQrKetua = $settings->payloadQrKetuaUmum($tanggalPp);
-    $payloadQrSekjen = $settings->payloadQrSekretarisJenderal($tanggalPp);
 @endphp
 
 @include('kta._kartu-style')
@@ -38,7 +34,7 @@
                         <p class="kta-nomor">{{ $anggota->nomor_anggota }}</p>
                         <p class="kta-pd">{{ $anggota->labelPdPergabi() }}</p>
                     </div>
-                    <div class="kta-qr"><canvas data-kta-qr width="160" height="160"></canvas></div>
+                    <div class="kta-qr"><canvas data-kta-verifikasi width="160" height="160"></canvas></div>
                 </div>
                 <p class="kta-berlaku">KTA ini berlaku s.d. {{ $anggota->masaBerlakuLabel() }}</p>
             </div>
@@ -85,12 +81,12 @@
                     <div class="kta-ttd-area">
                         <div class="kta-ttd-col">
                             <p class="kta-ttd-jabatan">Ketua Umum,</p>
-                            <canvas class="kta-ttd-qr" data-kta-ttd-qr data-payload="{{ $payloadQrKetua }}" width="120" height="120"></canvas>
+                            <canvas class="kta-ttd-qr" data-kta-pengesahan="ketua" width="160" height="160"></canvas>
                             <p class="kta-ttd-nama">{{ $identitas['nama_ketua_umum'] }}</p>
                         </div>
                         <div class="kta-ttd-col">
                             <p class="kta-ttd-jabatan">Sekretaris Jenderal,</p>
-                            <canvas class="kta-ttd-qr" data-kta-ttd-qr data-payload="{{ $payloadQrSekjen }}" width="120" height="120"></canvas>
+                            <canvas class="kta-ttd-qr" data-kta-pengesahan="sekjen" width="160" height="160"></canvas>
                             <p class="kta-ttd-nama">{{ $identitas['nama_sekretaris_jenderal'] }}</p>
                         </div>
                     </div>

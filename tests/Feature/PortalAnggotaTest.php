@@ -6,6 +6,7 @@ use App\Models\Anggota;
 use App\Models\AnggotaDokumen;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\SettingService;
 use Database\Seeders\RolePermissionSeeder;
 use Database\Seeders\WilayahSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -129,8 +130,11 @@ class PortalAnggotaTest extends TestCase
             ->assertDontSee('halaman-belakang.png')
             ->assertSee('verifikasi-qr-anggota', false)
             ->assertSee('kode=', false)
-            ->assertSee('data-kta-qr', false)
-            ->assertSee('data-kta-ttd-qr', false)
+            ->assertSee('data-kta-verifikasi', false)
+            ->assertSee('data-kta-pengesahan="ketua"', false)
+            ->assertSee('data-kta-pengesahan="sekjen"', false)
+            ->assertDontSee('data-kta-ttd-qr', false)
+            ->assertDontSee('data-payload=', false)
             ->assertDontSee('kta-stempel-belakang', false)
             ->assertSee('Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal '.$tanggalPp, false)
             ->assertSee('Telah disetujui oleh Sekretaris Jenderal PP Pergabi pada tanggal '.$tanggalPp, false)
@@ -156,6 +160,32 @@ class PortalAnggotaTest extends TestCase
             ->assertSee($anggota->alamatLabel())
             ->assertSee($anggota->labelPdPergabi())
             ->assertSee('NB:');
+    }
+
+    public function test_kta_pengesahan_qr_embeds_saved_identity_text(): void
+    {
+        app(SettingService::class)->putMany([
+            'organisasi.ttd_ketua_umum' => 'Disahkan Ketua Umum pada tanggal',
+            'organisasi.ttd_sekretaris_jenderal' => 'Disetujui Sekretaris Jenderal pada tanggal',
+        ]);
+
+        $user = $this->makeMember(Anggota::STATUS_AKTIF);
+        $anggota = $user->anggota;
+        $anggota->statusLogs()->create([
+            'status_dari' => Anggota::STATUS_MENUNGGU_PERSETUJUAN_PP,
+            'status_ke' => Anggota::STATUS_AKTIF,
+            'alasan' => 'Disetujui Pengurus Pusat.',
+            'user_id' => $user->id,
+            'created_at' => now(),
+        ]);
+        $tanggalPp = $anggota->fresh()->tanggalVerifikasiLabel();
+
+        $this->actingAs($user)
+            ->get(route('portal.kta'))
+            ->assertOk()
+            ->assertSee('Disahkan Ketua Umum pada tanggal '.$tanggalPp, false)
+            ->assertSee('Disetujui Sekretaris Jenderal pada tanggal '.$tanggalPp, false)
+            ->assertDontSee('Telah disetujui dan disahkan oleh Ketua Umum PP Pergabi pada tanggal '.$tanggalPp, false);
     }
 
     public function test_public_verification_shows_inactive_status(): void

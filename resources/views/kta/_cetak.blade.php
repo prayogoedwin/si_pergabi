@@ -1,3 +1,9 @@
+@php
+    $tanggalPp = $anggota->tanggalVerifikasiLabel();
+    $ktaQrSettings = app(\App\Services\SettingService::class);
+    $payloadQrKetua = $ktaQrSettings->payloadQrKetuaUmum($tanggalPp);
+    $payloadQrSekjen = $ktaQrSettings->payloadQrSekretarisJenderal($tanggalPp);
+@endphp
 @include('kta._qr-client')
 <script src="{{ asset('js/html-to-image.js') }}"></script>
 <style>
@@ -35,10 +41,14 @@
 
 <script>
     const verifikasiUrl = @js($verifikasiUrl);
+    const pengesahanQr = @json([
+        'ketua' => $payloadQrKetua ?? '',
+        'sekjen' => $payloadQrSekjen ?? '',
+    ]);
 
     function renderKtaQr() {
-        return window.drawPergabiQrAll('[data-kta-qr]', verifikasiUrl, 160).then(function () {
-            return window.drawPergabiQrFromData('[data-kta-ttd-qr]');
+        return window.drawPergabiQrAll('[data-kta-verifikasi]', verifikasiUrl, 160).then(function () {
+            return window.drawPergabiQrMap('[data-kta-pengesahan]', pengesahanQr);
         });
     }
 
