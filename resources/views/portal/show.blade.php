@@ -16,6 +16,27 @@
         </div>
     </section>
 
+    @php $buktiPembayaran = $anggota->dokumenTerbaru(\App\Models\AnggotaDokumen::BUKTI_PEMBAYARAN); @endphp
+    <x-rekening-pembayaran class="mt-4">
+        @if ($buktiPembayaran)
+            <p class="mt-3 text-sm">
+                Berkas saat ini:
+                <a href="{{ route('anggota.dokumen', [$anggota, $buktiPembayaran]) }}" class="text-saffron-700 font-medium hover:underline" target="_blank" rel="noopener">{{ $buktiPembayaran->nama_asli }}</a>
+            </p>
+        @endif
+        <form method="POST" action="{{ route('portal.bukti-pembayaran') }}" enctype="multipart/form-data" class="mt-3 space-y-3">
+            @csrf
+            <input type="file" name="bukti_pembayaran" accept="image/*,.pdf" required
+                class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-saffron-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-saffron-700">
+            @error('bukti_pembayaran')
+                <p class="text-sm text-red-600">{{ $message }}</p>
+            @enderror
+            <button type="submit" class="inline-flex rounded-xl bg-saffron-600 text-white px-4 py-2.5 text-sm font-semibold hover:bg-saffron-700">
+                {{ $buktiPembayaran ? 'Unggah ulang bukti pembayaran' : 'Unggah bukti pembayaran' }}
+            </button>
+        </form>
+    </x-rekening-pembayaran>
+
     @if ($anggota->canRenew())
         <div class="mt-4 rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
             <p class="font-semibold">Masa berlaku habis. Status keanggotaan tidak aktif.</p>

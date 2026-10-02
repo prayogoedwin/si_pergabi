@@ -29,6 +29,13 @@ return [
             'lambang' => 'assets/kta/bendera.png',
         ],
     ],
+    'rekening' => [
+        'judul' => 'Uang pendaftaran ditransfer ke Rekening:',
+        'bank' => 'BANK BRI',
+        'nomor' => '0418 0100 0920 300',
+        'atas_nama' => 'Perkumpulan Guru Agama Buddha Indonesia (PD PERGABI)',
+        'narasi' => 'Simpan bukti transfer untuk diunggah di formulir pendaftaran.',
+    ],
     'wp' => [
         'base_url' => env('PERGABI_WP_API_URL', 'https://pergabi.id/wp-json/wp/v2'),
         'kegiatan_category' => (int) env('PERGABI_WP_KEGIATAN_CATEGORY', 11),

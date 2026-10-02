@@ -284,6 +284,23 @@
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
                 </div>
+                @php $buktiPembayaran = $anggota->dokumenTerbaru(\App\Models\AnggotaDokumen::BUKTI_PEMBAYARAN); @endphp
+                <div>
+                    <p class="text-sm font-medium">Bukti pembayaran</p>
+                    @if ($buktiPembayaran)
+                        <p class="text-xs text-navy-800/55 mt-1">
+                            Berkas saat ini:
+                            <a href="{{ route('anggota.dokumen', [$anggota, $buktiPembayaran]) }}" class="text-saffron-700 hover:underline" target="_blank" rel="noopener">{{ $buktiPembayaran->nama_asli }}</a>
+                        </p>
+                    @else
+                        <p class="text-xs text-navy-800/55 mt-1">Belum diunggah.</p>
+                    @endif
+                    <input type="file" name="bukti_pembayaran" accept="image/*,.pdf" class="mt-2 block w-full text-sm">
+                    <p class="text-xs text-navy-800/50 mt-1">JPG, PNG, atau PDF, maksimal 2 MB.</p>
+                    @error('bukti_pembayaran')
+                        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                    @enderror
+                </div>
                 <p class="text-xs text-navy-800/50">Pas foto diperbarui di tab Data identitas.</p>
             </div>
 

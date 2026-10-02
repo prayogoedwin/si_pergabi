@@ -225,6 +225,7 @@ class PortalAnggotaTest extends TestCase
             ->assertSee($user->anggota->nik)
             ->assertSee('Pas foto')
             ->assertSee('SK Mengajar')
+            ->assertSee('Bukti pembayaran')
             ->assertDontSee('Ijazah')
             ->assertDontSee('Sertifikat Pendidik')
             ->assertSee('TK/PAUD')
@@ -287,6 +288,83 @@ class PortalAnggotaTest extends TestCase
         $this->assertSame('Guru Tanpa Ganti Foto', $anggota->nama);
         $this->assertSame($path, $anggota->foto_path);
         $this->assertSame(1, $anggota->dokumen()->where('jenis', AnggotaDokumen::PAS_FOTO)->count());
+    }
+
+    public function test_portal_shows_rekening_and_upload_control_above_progres(): void
+    {
+        $user = $this->makeMember();
+
+        $this->actingAs($user)
+            ->get(route('portal.show'))
+            ->assertOk()
+            ->assertSee('Uang pendaftaran ditransfer ke Rekening:')
+            ->assertSee('BANK BRI')
+            ->assertSee('0418 0100 0920 300')
+            ->assertSee('Perkumpulan Guru Agama Buddha Indonesia (PD PERGABI)')
+            ->assertSee('Simpan bukti transfer untuk diunggah di formulir pendaftaran.')
+            ->assertSee('Unggah bukti pembayaran')
+            ->assertSee('Progres verifikasi');
+    }
+
+    public function test_member_can_upload_and_view_bukti_pembayaran(): void
+    {
+        $user = $this->makeMember();
+
+        $this->actingAs($user)
+            ->post(route('portal.bukti-pembayaran'), [
+                'bukti_pembayaran' => UploadedFile::fake()->create('transfer.pdf', 80, 'application/pdf'),
+            ])
+            ->assertRedirect(route('portal.show'));
+
+        $bukti = $user->fresh()->anggota->dokumenTerbaru(AnggotaDokumen::BUKTI_PEMBAYARAN);
+        $this->assertNotNull($bukti);
+        $this->assertSame('transfer.pdf', $bukti->nama_asli);
+        Storage::disk('local')->assertExists($bukti->path);
+
+        $this->actingAs($user)
+            ->get(route('portal.show'))
+            ->assertOk()
+            ->assertSee('transfer.pdf')
+            ->assertSee('Unggah ulang bukti pembayaran');
+
+        $this->actingAs($user)
+            ->get(route('portal.profil', ['tab' => 'dokumen']))
+            ->assertOk()
+            ->assertSee('Bukti pembayaran')
+            ->assertSee('transfer.pdf');
+
+        $preview = $this->actingAs($user)
+            ->get(route('anggota.dokumen', [$user->anggota, $bukti]));
+
+        $preview->assertOk();
+        $this->assertStringContainsString('inline', strtolower((string) $preview->headers->get('content-disposition')));
+    }
+
+    public function test_admin_can_view_bukti_pembayaran_below_sk_mengajar(): void
+    {
+        $user = $this->makeMember();
+        $path = 'anggota/'.$user->anggota->id.'/transfer.pdf';
+        Storage::disk('local')->put($path, 'pdf');
+        $bukti = $user->anggota->dokumen()->create([
+            'jenis' => AnggotaDokumen::BUKTI_PEMBAYARAN,
+            'path' => $path,
+            'nama_asli' => 'transfer.pdf',
+            'mime' => 'application/pdf',
+            'ukuran' => 3,
+        ]);
+
+        $admin = User::query()->where('email', 'admin@example.com')->firstOrFail();
+
+        $this->actingAs($admin)
+            ->get(route('anggota.show', $user->anggota))
+            ->assertOk()
+            ->assertSee('SK Mengajar')
+            ->assertSee('Bukti pembayaran')
+            ->assertSee('transfer.pdf');
+
+        $this->actingAs($admin)
+            ->get(route('anggota.dokumen', [$user->anggota, $bukti]))
+            ->assertOk();
     }
 
     private function makeMember(

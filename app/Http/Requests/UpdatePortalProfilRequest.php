@@ -48,6 +48,7 @@ class UpdatePortalProfilRequest extends StorePendaftaranRequest
         $rules['status_guru'] = ['required', Rule::in($statusGuru)];
         $rules['pas_foto'] = ['nullable', 'file', 'image', 'max:2048'];
         $rules['sk_mengajar'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'];
+        $rules['bukti_pembayaran'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'];
 
         return $rules;
     }

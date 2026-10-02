@@ -215,7 +215,7 @@
 
             <div x-show="tab === 'dokumen'" x-cloak>
                 <ul class="divide-y divide-gray-100 dark:divide-gray-700">
-                    @foreach (\App\Models\AnggotaDokumen::formJenisLabels() as $jenis => $label)
+                    @foreach (\App\Models\AnggotaDokumen::displayJenisLabels() as $jenis => $label)
                         @php $dokumen = $anggota->dokumenTerbaru($jenis); @endphp
                         <li class="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                             <div>

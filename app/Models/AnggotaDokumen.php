@@ -13,6 +13,8 @@ class AnggotaDokumen extends Model
 
     public const SK_MENGAJAR = 'sk_mengajar';
 
+    public const BUKTI_PEMBAYARAN = 'bukti_pembayaran';
+
     public const IJAZAH = 'ijazah';
 
     public const SERTIFIKAT_PENDIDIK = 'sertifikat_pendidik';
@@ -36,6 +38,7 @@ class AnggotaDokumen extends Model
         return [
             self::PAS_FOTO => 'Pas foto',
             self::SK_MENGAJAR => 'SK Mengajar',
+            self::BUKTI_PEMBAYARAN => 'Bukti pembayaran',
             self::KTP => 'KTP',
             self::IJAZAH => 'Ijazah',
             self::SERTIFIKAT_PENDIDIK => 'Sertifikat Pendidik',
@@ -50,6 +53,18 @@ class AnggotaDokumen extends Model
         return [
             self::PAS_FOTO => 'Pas foto',
             self::SK_MENGAJAR => 'SK Mengajar',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function displayJenisLabels(): array
+    {
+        return [
+            self::PAS_FOTO => 'Pas foto',
+            self::SK_MENGAJAR => 'SK Mengajar',
+            self::BUKTI_PEMBAYARAN => 'Bukti pembayaran',
         ];
     }
 

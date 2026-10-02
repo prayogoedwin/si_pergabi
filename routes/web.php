@@ -143,6 +143,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('portal/profil', [PortalController::class, 'updateProfil'])->middleware('throttle:12,1')->name('portal.profil.update');
         Route::put('portal/password', [PortalController::class, 'updatePassword'])->name('portal.password');
         Route::post('portal/foto', [PortalController::class, 'updateFoto'])->name('portal.foto.update');
+        Route::post('portal/bukti-pembayaran', [PortalController::class, 'updateBuktiPembayaran'])->middleware('throttle:12,1')->name('portal.bukti-pembayaran');
         Route::get('portal/foto', [PortalController::class, 'foto'])->name('portal.foto');
         Route::get('keanggotaan', fn () => redirect()->route('portal.show'))->name('keanggotaan.show');
     });

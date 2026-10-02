@@ -20,6 +20,8 @@
                     },
                     colors: {
                         saffron: { 500: '#ee6b24', 600: '#e25a12', 700: '#c94b10' },
+                        navy: { 800: '#0c2244', 900: '#071422' },
+                        gold: { 400: '#f0c14b' },
                     },
                 },
             },
@@ -304,13 +306,19 @@
                         $dokumenFields = [
                             'pas_foto' => ['label' => 'Pas foto', 'required' => true, 'image' => true],
                             'sk_mengajar' => ['label' => 'SK Mengajar', 'required' => true, 'image' => false],
+                            'bukti_pembayaran' => ['label' => 'Bukti pembayaran', 'required' => false, 'image' => false],
                         ];
                     @endphp
+                    <div class="sm:col-span-2">
+                        <x-rekening-pembayaran />
+                    </div>
                     @foreach ($dokumenFields as $field => $dokumen)
                         <div>
                             <label class="block text-sm font-medium mb-1">
                                 {{ $dokumen['label'] }}
-                                <span class="text-red-600">*</span>
+                                @if ($dokumen['required'])
+                                    <span class="text-red-600">*</span>
+                                @endif
                             </label>
                             <input type="file" accept="{{ $dokumen['image'] ? 'image/*' : 'image/*,.pdf' }}" class="block w-full text-sm" @change="onFile('{{ $field }}', $event)">
                             <p class="text-xs text-slate-500 mt-1" x-show="files.{{ $field }}" x-text="files.{{ $field }}?.name"></p>
@@ -322,7 +330,7 @@
                             <p class="text-xs text-red-600 mt-1" x-text="fieldError('{{ $field }}')"></p>
                         </div>
                     @endforeach
-                    <p class="sm:col-span-2 text-xs text-slate-500">Pas foto wajib gambar. SK Mengajar boleh JPG, PNG, atau PDF. Maksimal 2 MB per berkas.</p>
+                    <p class="sm:col-span-2 text-xs text-slate-500">Pas foto wajib gambar. SK Mengajar dan bukti pembayaran boleh JPG, PNG, atau PDF. Maksimal 2 MB per berkas.</p>
                 </section>
 
                 <section x-show="step === 5 && !renewal" x-cloak class="space-y-4">

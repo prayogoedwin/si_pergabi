@@ -144,6 +144,7 @@ if ! grep -q '^APP_KEY=base64:' "$ROOT/.env"; then
 fi
 
 run_php artisan migrate --force
+run_php artisan db:seed --class=LinkInformasiPermissionSeeder --force
 run_php artisan storage:link --force >/dev/null 2>&1 || run_php artisan storage:link || true
 run_php artisan config:clear
 run_php artisan route:clear

@@ -55,6 +55,7 @@ class StorePendaftaranRequest extends FormRequest
             'password' => ['required', 'confirmed', Password::defaults()],
             'pas_foto' => ['required', 'file', 'image', 'max:2048'],
             'sk_mengajar' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+            'bukti_pembayaran' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
             'kanal_verifikasi' => ['nullable', 'in:email,whatsapp'],
         ];
     }
@@ -92,6 +93,7 @@ class StorePendaftaranRequest extends FormRequest
             'alamat_sekolah' => 'alamat sekolah',
             'pas_foto' => 'pas foto',
             'sk_mengajar' => 'SK Mengajar',
+            'bukti_pembayaran' => 'bukti pembayaran',
             'kanal_verifikasi' => 'kanal verifikasi',
         ];
     }
@@ -106,6 +108,7 @@ class StorePendaftaranRequest extends FormRequest
         foreach ([
             AnggotaDokumen::PAS_FOTO => 'pas_foto',
             AnggotaDokumen::SK_MENGAJAR => 'sk_mengajar',
+            AnggotaDokumen::BUKTI_PEMBAYARAN => 'bukti_pembayaran',
         ] as $jenis => $field) {
             $file = $this->file($field);
 

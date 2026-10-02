@@ -46,6 +46,7 @@ window.PergabiPendaftaran = function (config) {
         files: {
             pas_foto: null,
             sk_mengajar: null,
+            bukti_pembayaran: null,
         },
         options: {
             provinsi: [],
@@ -359,7 +360,7 @@ window.PergabiPendaftaran = function (config) {
                 1: ['nik', 'nama', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'status_perkawinan'],
                 2: ['hp', 'whatsapp', 'email', 'alamat', 'provinsi_kode', 'kabupaten_kode', 'kecamatan_kode', 'kelurahan_kode', 'kode_pos'],
                 3: ['status_guru', 'nip', 'jenjang', 'nama_sekolah', 'status_sekolah', 'alamat_sekolah'],
-                4: ['pas_foto', 'sk_mengajar'],
+                4: ['pas_foto', 'sk_mengajar', 'bukti_pembayaran'],
                 5: ['password', 'password_confirmation', 'kanal_verifikasi'],
             };
 

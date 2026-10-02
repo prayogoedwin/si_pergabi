@@ -222,6 +222,32 @@ class PortalController extends Controller
         return back()->with('status', 'Foto profil berhasil diperbarui.');
     }
 
+    public function updateBuktiPembayaran(Request $request): RedirectResponse
+    {
+        $anggota = $this->anggota($request);
+
+        $validated = $request->validate([
+            'bukti_pembayaran' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+        ], [], [
+            'bukti_pembayaran' => 'bukti pembayaran',
+        ]);
+
+        $file = $validated['bukti_pembayaran'];
+        $path = $file->store("anggota/{$anggota->id}", 'local');
+
+        $anggota->dokumen()->create([
+            'jenis' => AnggotaDokumen::BUKTI_PEMBAYARAN,
+            'path' => $path,
+            'nama_asli' => $file->getClientOriginalName(),
+            'mime' => $file->getClientMimeType(),
+            'ukuran' => $file->getSize() ?: 0,
+        ]);
+
+        return redirect()
+            ->route('portal.show')
+            ->with('status', 'Bukti pembayaran berhasil diunggah.');
+    }
+
     public function foto(Request $request): StreamedResponse
     {
         $anggota = $this->anggota($request);
@@ -339,7 +365,7 @@ class PortalController extends Controller
             'identitas' => ['nik', 'nama', 'gelar_depan', 'gelar_belakang', 'jenis_kelamin', 'tempat_lahir', 'tanggal_lahir', 'agama', 'status_perkawinan', 'pas_foto'],
             'kontak' => ['hp', 'whatsapp', 'email', 'alamat', 'provinsi_kode', 'kabupaten_kode', 'kecamatan_kode', 'kelurahan_kode', 'kode_pos'],
             'profesi' => ['status_guru', 'nip', 'nuptk', 'jenjang', 'nama_sekolah', 'npsn', 'status_sekolah', 'alamat_sekolah'],
-            'dokumen' => ['sk_mengajar'],
+            'dokumen' => ['sk_mengajar', 'bukti_pembayaran'],
             'akun' => ['current_password', 'password'],
         ];
 
