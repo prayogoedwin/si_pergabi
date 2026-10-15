@@ -46,6 +46,7 @@ class AnggotaController extends Controller
             ->visibleTo($user, $provinsi, $kabupaten)
             ->with(['user', 'pd', 'pc'])
             ->when($request->filled('status'), fn ($query) => $query->where('status', $request->string('status')))
+            ->cariNama($request->string('nama')->toString())
             ->latest()
             ->paginate(20)
             ->withQueryString();

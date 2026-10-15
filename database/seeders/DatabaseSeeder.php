@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             LinkInformasiPermissionSeeder::class,
             WilayahSeeder::class,
             OrganisasiSettingSeeder::class,
+            SampleAnggotaSeeder::class,
         ]);
     }
 }

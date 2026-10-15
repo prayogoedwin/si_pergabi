@@ -417,6 +417,31 @@ class Anggota extends Model
      * @param  Builder<Anggota>  $query
      * @return Builder<Anggota>
      */
+    public function scopeCariNama(Builder $query, ?string $nama): Builder
+    {
+        $nama = trim((string) $nama);
+
+        if ($nama === '') {
+            return $query;
+        }
+
+        $term = '%'.str_replace(['!', '%', '_'], ['!!', '!%', '!_'], $nama).'%';
+
+        return $query->where(function (Builder $query) use ($term): void {
+            foreach (['nama', 'gelar_depan', 'gelar_belakang'] as $index => $column) {
+                $query->whereRaw(
+                    "{$column} like ? escape '!'",
+                    [$term],
+                    $index === 0 ? 'and' : 'or',
+                );
+            }
+        });
+    }
+
+    /**
+     * @param  Builder<Anggota>  $query
+     * @return Builder<Anggota>
+     */
     public function scopeVisibleTo(Builder $query, User $viewer, ?string $provinsi = null, ?string $kabupaten = null): Builder
     {
         $provinsi = filled($provinsi) ? $provinsi : null;

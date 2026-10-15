@@ -191,6 +191,43 @@ class DashboardTest extends TestCase
             ->assertDontSee($cilegon->nama);
     }
 
+    public function test_admin_can_search_anggota_by_name_and_sees_nomor_before_nik(): void
+    {
+        $heni = $this->makeAnggota('36', '36.71');
+        $heni->update([
+            'nama' => 'Heni Damayanti',
+            'gelar_belakang' => 'S.Pd.',
+            'nomor_anggota' => '2026.36.3671.001',
+        ]);
+        $sugiat = $this->makeAnggota('36', '36.71');
+        $sugiat->update([
+            'nama' => 'Sugiat',
+            'nomor_anggota' => '2026.36.3671.002',
+        ]);
+
+        $this->actingAs($this->adminPp())
+            ->get(route('anggota.index', ['nama' => 'Heni']))
+            ->assertOk()
+            ->assertSee('Ketik nama anggota...')
+            ->assertSee('No. Anggota')
+            ->assertSee('Heni Damayanti')
+            ->assertSee('2026.36.3671.001')
+            ->assertDontSee('Sugiat')
+            ->assertSeeInOrder(['No. Anggota', 'NIK', '2026.36.3671.001', $heni->nik]);
+
+        $this->actingAs($this->adminPp())
+            ->get(route('anggota.index', ['nama' => 'S.Pd']))
+            ->assertOk()
+            ->assertSee('Heni Damayanti')
+            ->assertDontSee('Sugiat');
+
+        $this->actingAs($this->adminPp())
+            ->get(route('anggota.index', ['nama' => '%']))
+            ->assertOk()
+            ->assertDontSee('Heni Damayanti')
+            ->assertDontSee('Sugiat');
+    }
+
     public function test_admin_pc_does_not_see_wilayah_filters(): void
     {
         $this->seedWilayah();

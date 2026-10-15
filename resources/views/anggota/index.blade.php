@@ -13,6 +13,15 @@
 
     <form method="GET" class="mb-6 rounded-xl bg-white dark:bg-navy-900 border border-[#e4ddd3] dark:border-gold-400/25 p-4">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div>
+                <label for="cari-nama" class="block text-xs text-navy-800/50 dark:text-cream-100/60 mb-1">Nama</label>
+                <div class="flex gap-2">
+                    <input id="cari-nama" type="search" name="nama" value="{{ request('nama') }}" placeholder="Ketik nama anggota..."
+                        class="min-w-0 flex-1 h-[42px] rounded-lg border border-[#d6cfc3] bg-white px-3 text-sm text-navy-900 placeholder:text-navy-800/40 focus:border-navy-800 focus:outline-none focus:ring-2 focus:ring-navy-800/15 dark:border-gold-400/30 dark:bg-navy-950 dark:text-cream-100 dark:placeholder:text-cream-100/40 dark:focus:border-gold-400">
+                    <button type="submit" class="inline-flex h-[42px] shrink-0 items-center rounded-lg bg-navy-800 px-3 text-sm font-medium text-white hover:bg-navy-900 dark:bg-gold-400 dark:text-navy-950 dark:hover:bg-gold-300">Cari</button>
+                </div>
+            </div>
+
             @if ($showProvinsiFilter)
                 <div>
                     <label class="block text-xs text-navy-800/50 dark:text-cream-100/60 mb-1">Provinsi (PD)</label>
@@ -54,6 +63,7 @@
             <thead class="bg-[#f7f3ee] dark:bg-navy-950">
                 <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">Nama</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">No. Anggota</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">NIK</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">PD / PC</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-navy-800/50 dark:text-gold-400 uppercase">Masa berlaku</th>
@@ -65,6 +75,7 @@
                 @forelse ($anggota as $row)
                     <tr>
                         <td class="px-4 py-3 text-sm text-navy-900 dark:text-cream-100">{{ $row->namaLengkap() }}</td>
+                        <td class="px-4 py-3 text-sm text-navy-800/70 dark:text-cream-100/70 whitespace-nowrap">{{ $row->nomor_anggota ?: '—' }}</td>
                         <td class="px-4 py-3 text-sm text-navy-800/70 dark:text-cream-100/70">{{ $row->nik }}</td>
                         <td class="px-4 py-3 text-sm text-navy-800/70 dark:text-cream-100/70">{{ $row->pd?->nama }} / {{ $row->pc?->nama }}</td>
                         <td class="px-4 py-3 text-sm text-navy-800 dark:text-cream-100">
@@ -81,7 +92,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="px-4 py-6 text-sm text-navy-800/50 dark:text-cream-100/50">Belum ada pendaftaran.</td>
+                        <td colspan="7" class="px-4 py-6 text-sm text-navy-800/50 dark:text-cream-100/50">Belum ada pendaftaran.</td>
                     </tr>
                 @endforelse
             </tbody>
