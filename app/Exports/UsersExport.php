@@ -3,13 +3,15 @@
 namespace App\Exports;
 
 use App\Models\User;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\Export;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
-class UsersExport implements FromCollection, WithHeadings, WithMapping
+class UsersExport implements Export, FromCollection, WithHeadings, WithMapping
 {
-    public function collection()
+    public function collection(): Collection
     {
         return User::query()->visibleTo(auth()->user())->with('roles')->get();
     }

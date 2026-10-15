@@ -156,6 +156,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('laporan-visual', [LaporanController::class, 'visual'])->name('laporan.visual')->middleware('permission:view-laporan');
 
     Route::get('anggota', [AnggotaController::class, 'index'])->name('anggota.index')->middleware('permission:view-anggota');
+    Route::get('anggota/export', [AnggotaController::class, 'export'])->name('anggota.export')->middleware('permission:view-anggota');
     Route::get('anggota/import', [AnggotaImportController::class, 'create'])->name('anggota.import')->middleware('permission:import-anggota');
     Route::post('anggota/import', [AnggotaImportController::class, 'store'])->name('anggota.import.store')->middleware(['permission:import-anggota', 'throttle:6,1']);
     Route::get('anggota/import/template', [AnggotaImportController::class, 'template'])->name('anggota.import.template')->middleware('permission:import-anggota');

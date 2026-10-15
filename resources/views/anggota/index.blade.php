@@ -4,11 +4,16 @@
             <h1 class="font-display text-3xl font-bold text-navy-900 dark:text-cream-100">Anggota</h1>
             <p class="text-navy-800/60 dark:text-cream-100/70 mt-1">Pendaftaran dan verifikasi keanggotaan · {{ $wilayahLabel }}</p>
         </div>
-        @if (auth()->user()?->isSuperAdmin() || auth()->user()?->hasPermission('import-anggota'))
-            <a href="{{ route('anggota.import') }}">
-                <x-button type="secondary">Import Excel</x-button>
+        <div class="flex flex-wrap gap-2">
+            <a href="{{ route('anggota.export', request()->only(['nama', 'status', 'provinsi', 'kabupaten'])) }}">
+                <x-button type="secondary" tag="span">Export Excel</x-button>
             </a>
-        @endif
+            @if (auth()->user()?->isSuperAdmin() || auth()->user()?->hasPermission('import-anggota'))
+                <a href="{{ route('anggota.import') }}">
+                    <x-button type="secondary" tag="span">Import Excel</x-button>
+                </a>
+            @endif
+        </div>
     </div>
 
     <form method="GET" class="mb-6 rounded-xl bg-white dark:bg-navy-900 border border-[#e4ddd3] dark:border-gold-400/25 p-4">

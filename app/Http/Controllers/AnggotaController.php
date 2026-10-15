@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AnggotaExport;
 use App\Helpers\Area;
 use App\Http\Requests\UpdateAnggotaStatusRequest;
 use App\Models\Anggota;
@@ -16,7 +17,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use InvalidArgumentException;
+use Maatwebsite\Excel\Facades\Excel;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AnggotaController extends Controller
@@ -31,16 +34,7 @@ class AnggotaController extends Controller
 
         $user = $request->user();
         $level = $user->organisasiLevel();
-        $provinsi = $user->isNasional()
-            ? $this->nullableCode($request->input('provinsi'))
-            : ($level === Area::DAERAH ? $user->pd_kode : null);
-        $kabupaten = $level === Area::CABANG
-            ? null
-            : $this->nullableCode($request->input('kabupaten'));
-
-        if ($kabupaten && $provinsi && ! str_starts_with($kabupaten, $provinsi.'.')) {
-            $kabupaten = null;
-        }
+        [$provinsi, $kabupaten] = $this->wilayahFilter($request);
 
         $anggota = Anggota::query()
             ->visibleTo($user, $provinsi, $kabupaten)
@@ -70,6 +64,24 @@ class AnggotaController extends Controller
                 ? Wilayah::query()->anak($kabupatenParent)->orderBy('nama')->get(['kode', 'nama'])
                 : collect(),
         ]);
+    }
+
+    public function export(Request $request): BinaryFileResponse
+    {
+        abort_unless($request->user()?->hasPermission('view-anggota') || $request->user()?->isSuperAdmin(), 403);
+
+        [$provinsi, $kabupaten] = $this->wilayahFilter($request);
+
+        return Excel::download(
+            new AnggotaExport(
+                $request->user(),
+                $provinsi,
+                $kabupaten,
+                $request->filled('status') ? $request->string('status')->toString() : null,
+                $request->string('nama')->toString(),
+            ),
+            'anggota-'.now()->format('Y-m-d').'.xlsx',
+        );
     }
 
     public function show(Request $request, Anggota $anggota): View
@@ -261,6 +273,27 @@ class AnggotaController extends Controller
     private function assertCanProcess(Request $request, Anggota $anggota): void
     {
         abort_unless($request->user()?->canAccessAnggota($anggota), 403);
+    }
+
+    /**
+     * @return array{0: ?string, 1: ?string}
+     */
+    private function wilayahFilter(Request $request): array
+    {
+        $user = $request->user();
+        $level = $user->organisasiLevel();
+        $provinsi = $user->isNasional()
+            ? $this->nullableCode($request->input('provinsi'))
+            : ($level === Area::DAERAH ? $user->pd_kode : null);
+        $kabupaten = $level === Area::CABANG
+            ? null
+            : $this->nullableCode($request->input('kabupaten'));
+
+        if ($kabupaten && $provinsi && ! str_starts_with($kabupaten, $provinsi.'.')) {
+            $kabupaten = null;
+        }
+
+        return [$provinsi, $kabupaten];
     }
 
     private function nullableCode(mixed $value): ?string
