@@ -274,13 +274,16 @@
         color: #111;
         font-size: 1.72mm;
         font-weight: 700;
-        line-height: 1.4;
+        line-height: 1.25;
     }
     .kta-data-row {
         display: grid;
-        grid-template-columns: 18.2mm 1.8mm minmax(0, 1fr);
-        align-items: start;
-        column-gap: 0.5mm;
+        grid-template-columns: 19mm 2.2mm minmax(0, 1fr);
+        align-items: baseline;
+        column-gap: 0.7mm;
+    }
+    .kta-data-row > span:first-child {
+        white-space: nowrap;
     }
     .kta-data-value {
         min-width: 0;
