@@ -16,7 +16,7 @@
         </div>
         <div class="flex gap-2">
             @if(auth()->user()->hasPermission('download-users'))
-                <a href="{{ route('users.export') }}">
+                <a id="users-export" href="{{ route('users.export') }}">
                     <x-button type="secondary" tag="span">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -35,12 +35,23 @@
 
     <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="p-4">
+            <div class="mb-4 max-w-xs">
+                <label for="filter-role" class="block text-xs text-gray-500 dark:text-gray-400 mb-1">Role</label>
+                <select id="filter-role" class="w-full" data-placeholder="Semua role" data-allow-clear="true">
+                    <option value=""></option>
+                    @foreach ($roles as $role)
+                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                    @endforeach
+                </select>
+            </div>
             <table id="users-table" class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                 <thead class="bg-gray-50 dark:bg-gray-900">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Name') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Email') }}</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Roles') }}</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Provinsi</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Kota</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Created') }}</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{{ __('Actions') }}</th>
                     </tr>
@@ -55,18 +66,26 @@
 
     <script>
         $(document).ready(function() {
-            $('#users-table').DataTable({
+            const exportUrl = @js(route('users.export'));
+            const table = $('#users-table').DataTable({
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('users.index') }}',
+                ajax: {
+                    url: @js(route('users.index')),
+                    data: function (d) {
+                        d.role = $('#filter-role').val();
+                    }
+                },
                 columns: [
                     { data: 'name', name: 'name' },
                     { data: 'email', name: 'email' },
                     { data: 'roles', name: 'roles', orderable: false, searchable: false },
+                    { data: 'provinsi', name: 'provinsi', orderable: false, searchable: false },
+                    { data: 'kota', name: 'kota', orderable: false, searchable: false },
                     { data: 'created_at', name: 'created_at' },
                     { data: 'actions', name: 'actions', orderable: false, searchable: false, className: 'text-right whitespace-nowrap' }
                 ],
-                order: [[3, 'desc']],
+                order: [[5, 'desc']],
                 language: {
                     search: "_INPUT_",
                     searchPlaceholder: "Search users...",
@@ -81,6 +100,15 @@
                 pageLength: 10,
                 lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
                 stripeClasses: ['bg-white dark:bg-gray-800', 'bg-gray-50 dark:bg-gray-900']
+            });
+
+            $('#filter-role').on('change', function () {
+                const role = $(this).val();
+                const link = document.getElementById('users-export');
+                if (link) {
+                    link.href = role ? exportUrl + '?role=' + encodeURIComponent(role) : exportUrl;
+                }
+                table.ajax.reload();
             });
         });
     </script>

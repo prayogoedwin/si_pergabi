@@ -23,7 +23,15 @@ class UserController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $users = User::query()->visibleTo($request->user())->with('roles');
+            $users = User::query()
+                ->visibleTo($request->user())
+                ->with(['roles', 'pd', 'pc', 'anggota.pd', 'anggota.pc']);
+
+            if ($roleId = $this->allowedRoleId($request)) {
+                $users->whereHas('roles', fn ($roles) => $roles->whereKey($roleId));
+            } elseif ($request->filled('role')) {
+                $users->whereRaw('0 = 1');
+            }
 
             return DataTables::of($users)
                 ->addColumn('roles', function ($user) {
@@ -38,6 +46,8 @@ class UserController extends Controller
 
                     return $badges ?: '<span class="text-sm text-gray-500 dark:text-gray-400">No roles</span>';
                 })
+                ->addColumn('provinsi', fn (User $user) => $user->wilayahTampil()['provinsi'] ?: '—')
+                ->addColumn('kota', fn (User $user) => $user->wilayahTampil()['kota'] ?: '—')
                 ->addColumn('actions', function ($user) {
                     $actions = '';
 
@@ -69,12 +79,18 @@ class UserController extends Controller
                 ->make(true);
         }
 
-        return view('users.index');
+        return view('users.index', [
+            'roles' => Role::query()->visibleTo($request->user())->orderBy('name')->get(['id', 'name']),
+        ]);
     }
 
-    public function export()
+    public function export(Request $request)
     {
-        return Excel::download(new UsersExport, 'users-'.date('Y-m-d').'.xlsx');
+        if ($request->filled('role') && ! $this->allowedRoleId($request)) {
+            abort(404);
+        }
+
+        return Excel::download(new UsersExport($this->allowedRoleId($request)), 'users-'.date('Y-m-d').'.xlsx');
     }
 
     public function create(): View
@@ -164,6 +180,19 @@ class UserController extends Controller
         $user->delete();
 
         return to_route('users.index')->with('status', 'User deleted successfully.');
+    }
+
+    private function allowedRoleId(Request $request): ?int
+    {
+        if (! $request->filled('role')) {
+            return null;
+        }
+
+        $roleId = $request->integer('role');
+
+        return Role::query()->visibleTo($request->user())->whereKey($roleId)->exists()
+            ? $roleId
+            : null;
     }
 
     private function ensureUserVisible(User $user): void

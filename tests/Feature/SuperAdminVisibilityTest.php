@@ -2,8 +2,10 @@
 
 namespace Tests\Feature;
 
+use App\Models\Anggota;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\Wilayah;
 use Database\Seeders\RolePermissionSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -125,6 +127,82 @@ class SuperAdminVisibilityTest extends TestCase
         $this->actingAs(User::query()->where('email', 'admin.pd@example.com')->firstOrFail())
             ->post(route('users.reset-password', $target))
             ->assertForbidden();
+    }
+
+    public function test_user_list_shows_province_and_city_and_can_filter_by_role(): void
+    {
+        Wilayah::query()->insert([
+            ['kode' => '36', 'nama' => 'Banten'],
+            ['kode' => '36.71', 'nama' => 'Kota Tangerang'],
+            ['kode' => '32', 'nama' => 'Jawa Barat'],
+            ['kode' => '32.73', 'nama' => 'Kota Bandung'],
+        ]);
+
+        $member = User::factory()->create(['name' => 'Heni Anggota', 'email' => 'heni.anggota@example.com']);
+        $member->assignRole(Role::ANGGOTA);
+        Anggota::query()->create([
+            'user_id' => $member->id,
+            'nik' => '3201010101010001',
+            'nama' => 'Heni Anggota',
+            'jenis_kelamin' => 'P',
+            'tempat_lahir' => 'Bandung',
+            'tanggal_lahir' => '1992-02-02',
+            'agama' => 'Buddha',
+            'status_perkawinan' => 'Kawin',
+            'hp' => '081234567890',
+            'whatsapp' => '081234567890',
+            'email' => $member->email,
+            'alamat' => 'Jl. Melati',
+            'provinsi_kode' => '32',
+            'kabupaten_kode' => '32.73',
+            'kecamatan_kode' => '32.73.01',
+            'kelurahan_kode' => '32.73.01.1001',
+            'kode_pos' => '40111',
+            'status_guru' => 'ASN',
+            'jenjang' => 'SMA',
+            'nama_sekolah' => 'SMA Negeri 1',
+            'status_sekolah' => 'Negeri',
+            'alamat_sekolah' => 'Jl. Sekolah',
+            'pd_kode' => '32',
+            'pc_kode' => '32.73',
+            'status' => Anggota::STATUS_AKTIF,
+        ]);
+
+        $this->actingAs($this->superAdmin())
+            ->get(route('users.index'))
+            ->assertOk()
+            ->assertSee('Provinsi')
+            ->assertSee('Kota')
+            ->assertSee('Semua role')
+            ->assertSee('Admin PC');
+
+        $list = $this->actingAs($this->superAdmin())
+            ->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
+            ->getJson(route('users.index'));
+
+        $list->assertOk();
+        $rows = collect($list->json('data'));
+        $adminPc = $rows->firstWhere('email', 'admin.pc@example.com');
+        $this->assertSame('Banten', $adminPc['provinsi']);
+        $this->assertSame('Kota Tangerang', $adminPc['kota']);
+
+        $anggota = $rows->firstWhere('email', 'heni.anggota@example.com');
+        $this->assertSame('Jawa Barat', $anggota['provinsi']);
+        $this->assertSame('Kota Bandung', $anggota['kota']);
+
+        $roleId = Role::query()->where('slug', Role::ADMIN_PC)->value('id');
+        $filtered = $this->actingAs($this->superAdmin())
+            ->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
+            ->getJson(route('users.index', ['role' => $roleId]));
+
+        $emails = collect($filtered->json('data'))->pluck('email');
+        $this->assertTrue($emails->contains('admin.pc@example.com'));
+        $this->assertFalse($emails->contains('admin.pd@example.com'));
+        $this->assertFalse($emails->contains('heni.anggota@example.com'));
+
+        $this->actingAs($this->admin())
+            ->get(route('users.export', ['role' => Role::query()->where('slug', Role::SUPER_ADMIN)->value('id')]))
+            ->assertNotFound();
     }
 
     public function test_super_admin_can_see_super_admin_user_in_the_list(): void

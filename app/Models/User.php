@@ -220,6 +220,32 @@ class User extends Authenticatable implements MustVerifyEmail
         };
     }
 
+    /**
+     * @return array{provinsi: string, kota: string}
+     */
+    public function wilayahTampil(): array
+    {
+        $provinsi = $this->pd?->nama ?: (string) $this->pd_kode;
+        $kota = $this->pc?->nama ?: (string) $this->pc_kode;
+
+        if ($provinsi === '' && $kota === '' && $this->anggota) {
+            $provinsi = $this->anggota->pd?->nama ?: (string) $this->anggota->pd_kode;
+            $kota = $this->anggota->pc?->nama ?: (string) $this->anggota->pc_kode;
+        }
+
+        return [
+            'provinsi' => $provinsi,
+            'kota' => $kota,
+        ];
+    }
+
+    public function wilayahTampilLabel(): string
+    {
+        $label = collect($this->wilayahTampil())->filter()->implode(' / ');
+
+        return $label !== '' ? $label : '—';
+    }
+
     public function pd(): BelongsTo
     {
         return $this->belongsTo(Wilayah::class, 'pd_kode', 'kode');
