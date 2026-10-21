@@ -46,9 +46,9 @@ class UpdatePortalProfilRequest extends StorePendaftaranRequest
         $rules['email'] = ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($userId)];
         $rules['jenjang'] = ['required', Rule::in($jenjang)];
         $rules['status_guru'] = ['required', Rule::in($statusGuru)];
-        $rules['pas_foto'] = ['nullable', 'file', 'image', 'max:2048'];
-        $rules['sk_mengajar'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'];
-        $rules['bukti_pembayaran'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'];
+        $rules['pas_foto'] = ['nullable', 'file', 'image', 'max:'.$this->dokumenMaxKb()];
+        $rules['sk_mengajar'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.$this->dokumenMaxKb()];
+        $rules['bukti_pembayaran'] = ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.$this->dokumenMaxKb()];
 
         return $rules;
     }

@@ -2,7 +2,7 @@
     <div class="mb-6">
         <h1 class="font-display text-3xl font-bold text-navy-900 dark:text-cream-100">Dashboard</h1>
         <p class="text-navy-800/60 dark:text-cream-100/70 mt-1">
-            Sistem Informasi Keanggotaan PERGABI
+            Sistem Anggota PERGABI (SAP) Digital
             <span class="text-navy-800/40 dark:text-gold-400">· {{ $wilayahLabel }}</span>
         </p>
     </div>

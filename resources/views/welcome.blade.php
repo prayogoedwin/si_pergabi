@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PERGABI — Sistem Informasi Keanggotaan</title>
-    <meta name="description" content="Perkumpulan Guru Agama Buddha Indonesia. Sistem informasi keanggotaan nasional berjenjang PP, PD, dan PC.">
+    <title>Sistem Anggota PERGABI (SAP) Digital</title>
+    <meta name="description" content="Perkumpulan Guru Agama Buddha Indonesia. Sistem Anggota PERGABI (SAP) Digital, keanggotaan nasional berjenjang PP, PD, dan PC.">
     <link rel="icon" type="image/png" href="{{ asset('images/logo-pergabi.png') }}">
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=be-vietnam-pro:400,500,600,700|cormorant-garamond:600,700" rel="stylesheet">
@@ -92,9 +92,11 @@
 
         .kicker {
             margin: 0 0 0.45rem;
-            font-size: 0.72rem;
+            max-width: 28rem;
+            font-size: 0.78rem;
             font-weight: 600;
-            letter-spacing: 0.28em;
+            letter-spacing: 0.14em;
+            line-height: 1.6;
             text-transform: uppercase;
             color: var(--gold);
         }
@@ -229,7 +231,7 @@
                 <img src="{{ asset('images/logo-pergabi.png') }}" alt="Lambang PERGABI">
             </div>
 
-            <p class="kicker">Sistem Informasi Keanggotaan</p>
+            <p class="kicker">Sistem Anggota PERGABI (SAP) Digital</p>
             <h1>PERGABI</h1>
             <p class="fullname">Perkumpulan Guru Agama Buddha Indonesia</p>
             <p class="tagline">Keanggotaan nasional berjenjang dari pusat hingga cabang</p>

@@ -9,7 +9,7 @@
                 <span>v{{ config('app.version', '1.0.0') }}</span>
             </div>
             <div>
-                Sistem Informasi Keanggotaan
+                Sistem Anggota PERGABI (SAP) Digital
             </div>
         </div>
     </div>

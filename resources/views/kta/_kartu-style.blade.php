@@ -292,6 +292,14 @@
         max-height: 2.5em;
         color: #111111;
     }
+    .kta-data-row-alamat {
+        align-items: start;
+    }
+    .kta-data-alamat {
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+        max-height: calc(1.25em * 3);
+    }
     .kta-ttd-blok {
         margin-top: auto;
         padding-top: 1.2mm;

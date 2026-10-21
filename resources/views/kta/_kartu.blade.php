@@ -70,9 +70,9 @@
                         <span>Instansi</span><span>:</span>
                         <span class="kta-data-value">{{ $anggota->instansiLabel() }}</span>
                     </div>
-                    <div class="kta-data-row">
+                    <div class="kta-data-row kta-data-row-alamat">
                         <span>Alamat</span><span>:</span>
-                        <span class="kta-data-value">{{ $anggota->alamatLabel() }}</span>
+                        <span class="kta-data-value kta-data-alamat">{{ $anggota->alamatLabel() }}</span>
                     </div>
                 </div>
                 <div class="kta-ttd-blok">

@@ -330,7 +330,7 @@
                             <p class="text-xs text-red-600 mt-1" x-text="fieldError('{{ $field }}')"></p>
                         </div>
                     @endforeach
-                    <p class="sm:col-span-2 text-xs text-slate-500">Pas foto wajib gambar. SK Mengajar dan bukti pembayaran boleh JPG, PNG, atau PDF. Maksimal 2 MB per berkas.</p>
+                    <p class="sm:col-span-2 text-xs text-slate-500">Pas foto wajib gambar. SK Mengajar dan bukti pembayaran boleh JPG, PNG, atau PDF. Maksimal 500 KB per berkas.</p>
                 </section>
 
                 <section x-show="step === 5 && !renewal" x-cloak class="space-y-4">

@@ -3,7 +3,7 @@
         <div class="p-7">
             <div class="mb-5 text-center">
                 <h1 class="text-2xl font-bold text-slate-800">Masuk</h1>
-                <p class="text-sm text-slate-500 mt-1">Sistem Informasi Keanggotaan PERGABI</p>
+                <p class="text-sm text-slate-500 mt-1">Sistem Anggota PERGABI (SAP) Digital</p>
             </div>
 
             <form method="POST" action="{{ route('login') }}" class="space-y-3">

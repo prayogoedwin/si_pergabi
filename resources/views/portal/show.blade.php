@@ -26,6 +26,7 @@
         @endif
         <form method="POST" action="{{ route('portal.bukti-pembayaran') }}" enctype="multipart/form-data" class="mt-3 space-y-3">
             @csrf
+            <p class="text-xs text-navy-800/60">JPG, PNG, atau PDF, maksimal 500 KB.</p>
             <input type="file" name="bukti_pembayaran" accept="image/*,.pdf" required
                 class="block w-full text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-saffron-50 file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-saffron-700">
             @error('bukti_pembayaran')

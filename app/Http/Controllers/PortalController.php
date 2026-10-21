@@ -194,8 +194,11 @@ class PortalController extends Controller
     {
         $anggota = $this->anggota($request);
 
+        $maxKb = (int) config('pergabi.dokumen_max_kb');
         $validated = $request->validate([
-            'foto' => ['required', 'image', 'max:2048'],
+            'foto' => ['required', 'image', 'max:'.$maxKb],
+        ], [
+            'foto.max' => "Pas foto maksimal {$maxKb} KB.",
         ]);
 
         $file = $validated['foto'];
@@ -226,9 +229,12 @@ class PortalController extends Controller
     {
         $anggota = $this->anggota($request);
 
+        $maxKb = (int) config('pergabi.dokumen_max_kb');
         $validated = $request->validate([
-            'bukti_pembayaran' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
-        ], [], [
+            'bukti_pembayaran' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.$maxKb],
+        ], [
+            'bukti_pembayaran.max' => "Bukti pembayaran maksimal {$maxKb} KB.",
+        ], [
             'bukti_pembayaran' => 'bukti pembayaran',
         ]);
 

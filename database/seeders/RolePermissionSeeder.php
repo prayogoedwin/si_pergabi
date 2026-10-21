@@ -66,10 +66,15 @@ class RolePermissionSeeder extends Seeder
             'view-users', 'show-users', 'create-users', 'edit-users', 'download-users', 'delete-users',
         ])->pluck('id');
 
-        $leaderPermissions = Permission::whereIn('name', [
+        $leaderBase = [
             'view-anggota', 'show-anggota',
             'view-laporan', 'download-laporan',
-        ])->pluck('id');
+        ];
+
+        $leaderPermissions = Permission::whereIn('name', $leaderBase)->pluck('id');
+        $ketuaPcPermissions = Permission::whereIn('name', [...$leaderBase, 'verify-anggota-pc'])->pluck('id');
+        $ketuaPdPermissions = Permission::whereIn('name', [...$leaderBase, 'validate-anggota-pd'])->pluck('id');
+        $ketuaPpPermissions = Permission::whereIn('name', [...$leaderBase, 'approve-anggota-pp'])->pluck('id');
 
         $adminPcPermissions = Permission::whereIn('name', [
             'view-anggota', 'show-anggota', 'verify-anggota-pc',
@@ -100,11 +105,11 @@ class RolePermissionSeeder extends Seeder
             ['slug' => Role::ADMIN_PP, 'name' => 'Admin PP', 'area' => Area::PUSAT, 'permissions' => 'admin-pp'],
             ['slug' => Role::ADMIN_PD, 'name' => 'Admin PD', 'area' => Area::DAERAH, 'permissions' => 'admin-pd'],
             ['slug' => Role::ADMIN_PC, 'name' => 'Admin PC', 'area' => Area::CABANG, 'permissions' => 'admin-pc'],
-            ['slug' => 'ketua-umum-pp', 'name' => 'Ketua Umum PP', 'area' => Area::PUSAT, 'permissions' => 'leader'],
+            ['slug' => 'ketua-umum-pp', 'name' => 'Ketua Umum PP', 'area' => Area::PUSAT, 'permissions' => 'ketua-pp'],
             ['slug' => 'sekretaris-jenderal-pp', 'name' => 'Sekretaris Jenderal PP', 'area' => Area::PUSAT, 'permissions' => 'leader'],
-            ['slug' => 'ketua-pd', 'name' => 'Ketua PD', 'area' => Area::DAERAH, 'permissions' => 'leader'],
+            ['slug' => 'ketua-pd', 'name' => 'Ketua PD', 'area' => Area::DAERAH, 'permissions' => 'ketua-pd'],
             ['slug' => 'sekretaris-pd', 'name' => 'Sekretaris PD', 'area' => Area::DAERAH, 'permissions' => 'leader'],
-            ['slug' => 'ketua-pc', 'name' => 'Ketua PC', 'area' => Area::CABANG, 'permissions' => 'leader'],
+            ['slug' => 'ketua-pc', 'name' => 'Ketua PC', 'area' => Area::CABANG, 'permissions' => 'ketua-pc'],
             ['slug' => 'sekretaris-pc', 'name' => 'Sekretaris PC', 'area' => Area::CABANG, 'permissions' => 'leader'],
             ['slug' => Role::ANGGOTA, 'name' => 'Anggota', 'area' => null, 'permissions' => 'none'],
         ];
@@ -126,6 +131,9 @@ class RolePermissionSeeder extends Seeder
                 'admin-pp' => $adminPpPermissions,
                 'admin-pd' => $adminPdPermissions,
                 'admin-pc' => $adminPcPermissions,
+                'ketua-pp' => $ketuaPpPermissions,
+                'ketua-pd' => $ketuaPdPermissions,
+                'ketua-pc' => $ketuaPcPermissions,
                 'leader' => $leaderPermissions,
                 default => collect(),
             };

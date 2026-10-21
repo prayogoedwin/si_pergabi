@@ -1,6 +1,7 @@
 <?php
 
 return [
+    'dokumen_max_kb' => 500,
     'masa_berlaku_tahun' => (int) env('PERGABI_MASA_BERLAKU_TAHUN', 5),
     'dashboard_cache_ttl' => (int) env('PERGABI_DASHBOARD_CACHE_TTL', 3600),
     'website' => env('PERGABI_WEBSITE', 'www.pergabi.or.id'),

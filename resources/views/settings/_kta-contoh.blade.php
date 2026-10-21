@@ -53,7 +53,7 @@
                             <div class="kta-data-row"><span>NTA</span><span>:</span><span class="kta-data-value">demo</span></div>
                             <div class="kta-data-row"><span>NIK</span><span>:</span><span class="kta-data-value">demo</span></div>
                             <div class="kta-data-row"><span>Instansi</span><span>:</span><span class="kta-data-value">demo</span></div>
-                            <div class="kta-data-row"><span>Alamat</span><span>:</span><span class="kta-data-value">demo</span></div>
+                            <div class="kta-data-row kta-data-row-alamat"><span>Alamat</span><span>:</span><span class="kta-data-value kta-data-alamat">demo</span></div>
                         </div>
                         <div class="kta-ttd-blok">
                             <p class="kta-tanggal">Jakarta, {{ $tanggalTerbit }}</p>

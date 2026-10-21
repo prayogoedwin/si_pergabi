@@ -67,7 +67,7 @@
                         </div>
                         <div class="min-w-0 flex-1">
                             <input type="file" name="pas_foto" accept="image/*" class="block w-full text-sm">
-                            <p class="text-xs text-navy-800/50 mt-1">Kosongkan jika tidak diganti. Gambar, maksimal 2 MB.</p>
+                            <p class="text-xs text-navy-800/50 mt-1">Kosongkan jika tidak diganti. Gambar, maksimal 500 KB.</p>
                             @error('pas_foto')
                                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                             @enderror
@@ -279,7 +279,7 @@
                         <p class="text-xs text-navy-800/55 mt-1">Belum ada berkas.</p>
                     @endif
                     <input type="file" name="sk_mengajar" accept="image/*,.pdf" class="mt-2 block w-full text-sm">
-                    <p class="text-xs text-navy-800/50 mt-1">Kosongkan jika tidak diganti. JPG, PNG, atau PDF, maksimal 2 MB.</p>
+                    <p class="text-xs text-navy-800/50 mt-1">Kosongkan jika tidak diganti. JPG, PNG, atau PDF, maksimal 500 KB.</p>
                     @error('sk_mengajar')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -296,7 +296,7 @@
                         <p class="text-xs text-navy-800/55 mt-1">Belum diunggah.</p>
                     @endif
                     <input type="file" name="bukti_pembayaran" accept="image/*,.pdf" class="mt-2 block w-full text-sm">
-                    <p class="text-xs text-navy-800/50 mt-1">JPG, PNG, atau PDF, maksimal 2 MB.</p>
+                    <p class="text-xs text-navy-800/50 mt-1">JPG, PNG, atau PDF, maksimal 500 KB.</p>
                     @error('bukti_pembayaran')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
                     @enderror

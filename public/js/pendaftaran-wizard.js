@@ -184,8 +184,8 @@ window.PergabiPendaftaran = function (config) {
                 return;
             }
 
-            if (file.size > 2 * 1024 * 1024) {
-                this.errors[jenis] = 'Ukuran berkas maksimal 2 MB.';
+            if (file.size > 500 * 1024) {
+                this.errors[jenis] = 'Ukuran berkas maksimal 500 KB.';
                 event.target.value = '';
                 return;
             }

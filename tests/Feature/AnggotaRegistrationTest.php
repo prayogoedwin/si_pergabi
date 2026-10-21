@@ -31,6 +31,17 @@ class AnggotaRegistrationTest extends TestCase
         Storage::fake('local');
     }
 
+    public function test_registration_rejects_a_document_larger_than_500_kilobytes(): void
+    {
+        $this->postJson(route('daftar.store'), $this->payload([
+            'sk_mengajar' => UploadedFile::fake()->create('sk.pdf', 600, 'application/pdf'),
+        ]))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('sk_mengajar');
+
+        $this->assertSame(0, Anggota::query()->count());
+    }
+
     public function test_public_wizard_is_available(): void
     {
         $this->get(route('daftar'))
@@ -38,6 +49,7 @@ class AnggotaRegistrationTest extends TestCase
             ->assertSee('Formulir pendaftaran')
             ->assertSee('tersimpan otomatis')
             ->assertSee('pendaftaran-wizard.js')
+            ->assertSee('Maksimal 500 KB per berkas.')
             ->assertSee('NPSN')
             ->assertSee('(opsional)')
             ->assertSee('SK Mengajar')

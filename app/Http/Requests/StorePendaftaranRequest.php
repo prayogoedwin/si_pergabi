@@ -53,9 +53,9 @@ class StorePendaftaranRequest extends FormRequest
             'status_sekolah' => ['required', Rule::in(array_keys(Anggota::statusSekolahOptions()))],
             'alamat_sekolah' => ['required', 'string', 'max:500'],
             'password' => ['required', 'confirmed', Password::defaults()],
-            'pas_foto' => ['required', 'file', 'image', 'max:2048'],
-            'sk_mengajar' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
-            'bukti_pembayaran' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+            'pas_foto' => ['required', 'file', 'image', 'max:'.$this->dokumenMaxKb()],
+            'sk_mengajar' => ['required', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.$this->dokumenMaxKb()],
+            'bukti_pembayaran' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:'.$this->dokumenMaxKb()],
             'kanal_verifikasi' => ['nullable', 'in:email,whatsapp'],
         ];
     }
@@ -96,6 +96,25 @@ class StorePendaftaranRequest extends FormRequest
             'bukti_pembayaran' => 'bukti pembayaran',
             'kanal_verifikasi' => 'kanal verifikasi',
         ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        $max = $this->dokumenMaxKb();
+
+        return [
+            'pas_foto.max' => "Pas foto maksimal {$max} KB.",
+            'sk_mengajar.max' => "SK Mengajar maksimal {$max} KB.",
+            'bukti_pembayaran.max' => "Bukti pembayaran maksimal {$max} KB.",
+        ];
+    }
+
+    protected function dokumenMaxKb(): int
+    {
+        return (int) config('pergabi.dokumen_max_kb');
     }
 
     /**
