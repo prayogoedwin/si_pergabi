@@ -100,7 +100,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium mb-1">Redirect URI</label>
-                    <input name="google_redirect_uri" form="integrasi-form" value="{{ old('google_redirect_uri', $values['google_redirect_uri']) }}" class="w-full rounded-lg" placeholder="http://127.0.0.1:8000/login/google/callback">
+                    <input name="google_redirect_uri" form="integrasi-form" value="{{ old('google_redirect_uri', $values['google_redirect_uri']) }}" class="w-full rounded-lg" placeholder="http://127.0.0.1:8000/auth/google/callback">
                     <p class="text-xs text-gray-500 mt-1">Harus sama persis dengan Authorized redirect URI di Google Cloud Console.</p>
                     @error('google_redirect_uri')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>

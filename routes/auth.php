@@ -11,8 +11,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
     Route::post('login', [LoginController::class, 'store']);
-    Route::get('login/google', [GoogleLoginController::class, 'redirect'])->middleware('throttle:10,1')->name('login.google');
-    Route::get('login/google/callback', [GoogleLoginController::class, 'callback'])->middleware('throttle:10,1')->name('login.google.callback');
+    Route::get('auth/google', [GoogleLoginController::class, 'redirect'])->middleware('throttle:10,1')->name('login.google');
+    Route::get('auth/google/callback', [GoogleLoginController::class, 'callback'])->middleware('throttle:10,1')->name('login.google.callback');
 
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])->name('password.request');
     Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])->name('password.email');

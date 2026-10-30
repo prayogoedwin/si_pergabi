@@ -46,7 +46,7 @@ class IntegrasiSettingTest extends TestCase
                 'mail_from_name' => 'PERGABI',
                 'google_client_id' => 'google-client-id',
                 'google_client_secret' => 'google-secret-lama',
-                'google_redirect_uri' => 'http://127.0.0.1:8000/login/google/callback',
+                'google_redirect_uri' => 'http://127.0.0.1:8000/auth/google/callback',
                 'fonnte_token' => 'token-fonnte',
             ])
             ->assertRedirect()
@@ -59,7 +59,7 @@ class IntegrasiSettingTest extends TestCase
         $this->assertSame('smtp-secret', $settings->get('mail.password'));
         $this->assertSame('google-client-id', $settings->get('google.client_id'));
         $this->assertSame('google-secret-lama', $settings->get('google.client_secret'));
-        $this->assertSame('http://127.0.0.1:8000/login/google/callback', $settings->get('google.redirect_uri'));
+        $this->assertSame('http://127.0.0.1:8000/auth/google/callback', $settings->get('google.redirect_uri'));
         $this->assertSame('token-fonnte', $settings->fonnteToken());
         $this->assertTrue($settings->googleLoginEnabled());
         $this->assertSame('smtp.example.com', config('mail.mailers.smtp.host'));
@@ -83,7 +83,7 @@ class IntegrasiSettingTest extends TestCase
                 'mail_from_name' => 'PERGABI',
                 'google_client_id' => 'google-client-id',
                 'google_client_secret' => '',
-                'google_redirect_uri' => 'http://127.0.0.1:8000/login/google/callback',
+                'google_redirect_uri' => 'http://127.0.0.1:8000/auth/google/callback',
                 'fonnte_token' => '',
             ])
             ->assertRedirect();
@@ -102,7 +102,7 @@ class IntegrasiSettingTest extends TestCase
                 'mail_mailer' => 'log',
                 'google_client_id' => 'google-client-id',
                 'google_client_secret' => 'google-client-secret',
-                'google_redirect_uri' => 'http://127.0.0.1:8000/login/google/callback',
+                'google_redirect_uri' => 'http://127.0.0.1:8000/auth/google/callback',
             ])
             ->assertRedirect();
 
